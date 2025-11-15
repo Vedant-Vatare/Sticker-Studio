@@ -17,7 +17,7 @@ const MobileNavigationLayout = () => {
     currentPage = 'account';
 
   return (
-    <div className="font-heading fixed right-0 bottom-0 left-0 z-[999] flex justify-around border-t border-gray-200 bg-white p-2 text-xs font-semibold tracking-wide md:hidden">
+    <div className="font-heading fixed right-0 bottom-0 left-0 z-999 flex justify-around border-t border-gray-200 bg-white p-2 text-xs font-semibold tracking-wide md:hidden">
       <Link to="/" className="flex cursor-pointer flex-col items-center">
         <span
           className={`rounded-full p-3 transition-colors ${currentPage === 'home' ? 'bg-primary text-white' : 'bg-primary-foreground'}`}

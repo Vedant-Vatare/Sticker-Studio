@@ -109,7 +109,7 @@ const UserVerification = () => {
   };
 
   return (
-    <div className="md:bg-primary/5 relative flex h-[100dvh] w-full items-center justify-center md:p-4">
+    <div className="md:bg-primary/5 relative flex h-dvh w-full items-center justify-center md:p-4">
       <motion.div
         className="w-full max-w-md"
         initial={{ opacity: 0, x: 20 }}

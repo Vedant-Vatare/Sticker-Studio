@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 const PageNotFound = () => {
   return (
-    <div className="flex min-h-[100dvh] w-screen flex-col items-center justify-center">
+    <div className="flex min-h-dvh w-screen flex-col items-center justify-center">
       <div className="flex items-center">
         <img
           src={logoIcon}

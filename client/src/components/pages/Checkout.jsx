@@ -133,13 +133,13 @@ const Checkout = () => {
           setShippingAddressId={setShippingAddressId}
         />
         <Card className="border-border bg-muted/30 gap-3 rounded-xs border p-4 md:p-6">
-          <h2 className="text-foreground !font-medium">Order Summary</h2>
+          <h2 className="text-foreground font-medium!">Order Summary</h2>
 
           <div className="space-y-4">
             {cartItems?.map((item, index) => (
               <div key={item.id}>
                 <div className="flex items-center justify-between gap-4">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="bg-muted relative h-20 w-20 overflow-hidden rounded-lg sm:h-32 sm:w-32">
                       <img
                         src={item.product.images[0]}

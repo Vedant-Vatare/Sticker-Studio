@@ -11,7 +11,7 @@ const RootLayout = () => {
       <TopBanner />
       <RootHeaderLayout />
       <ScrollManager />
-      <main className="min-h-screen pb-[80px] md:pb-0">
+      <main className="min-h-screen pb-20 md:pb-0">
         <Outlet />
       </main>
       <Footer />

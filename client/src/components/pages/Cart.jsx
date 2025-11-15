@@ -137,7 +137,7 @@ const CartItem = ({ item }) => {
   return (
     <Card className="border-border bg-muted/40 w-full overflow-hidden border py-4">
       <div className="flex gap-2 px-2 py-2 sm:flex-row sm:gap-6 md:p-4 md:py-2">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <div className="bg-muted relative h-24 w-24 overflow-hidden rounded-lg sm:h-32 sm:w-32">
             <img
               src={product.images[0]}

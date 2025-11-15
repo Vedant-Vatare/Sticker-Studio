@@ -158,7 +158,7 @@ const Footer = () => {
             <h4 className="font-semibold">Contact Info</h4>
             <ul className="mt-4 space-y-3 text-sm">
               <li className="text-sx fletext-xs">
-                <Phone size={16} className="mt-0.5 flex-shrink-0" />
+                <Phone size={16} className="mt-0.5 shrink-0" />
                 <a
                   href="tel:+1234567890"
                   className="opacity-80 transition hover:opacity-100"
@@ -167,7 +167,7 @@ const Footer = () => {
                 </a>
               </li>
               <li className="flex gap-3 text-xs">
-                <Mail size={16} className="mt-0.5 flex-shrink-0" />
+                <Mail size={16} className="mt-0.5 shrink-0" />
                 <a
                   href="mailto:support@stickerstudio.com"
                   className="opacity-80 transition hover:opacity-100"
@@ -176,7 +176,7 @@ const Footer = () => {
                 </a>
               </li>
               <li className="flex gap-3 text-xs">
-                <MapPin size={16} className="mt-0.5 flex-shrink-0" />
+                <MapPin size={16} className="mt-0.5 shrink-0" />
                 <span className="opacity-80">Address</span>
               </li>
             </ul>

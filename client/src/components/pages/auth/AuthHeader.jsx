@@ -4,7 +4,7 @@ import logo from '@/assets/logo.png';
 const AuthHeader = () => {
   return (
     <>
-      <header className="absolute top-0 z-[999] w-full bg-white p-2 shadow-md md:pl-24">
+      <header className="absolute top-0 z-999 w-full bg-white p-2 shadow-md md:pl-24">
         <Link to="/">
           <img
             className="h-10 object-contain"

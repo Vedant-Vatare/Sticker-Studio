@@ -18,7 +18,7 @@ export default function TopBanner() {
   return (
     <div
       style={{ background: 'var(--gradient-accent)' }}
-      className={`font-heading font-base relative z-[999] overflow-hidden text-center text-xs font-medium tracking-wide text-white transition-all duration-500 ease-in-out ${
+      className={`font-heading font-base relative z-999 overflow-hidden text-center text-xs font-medium tracking-wide text-white transition-all duration-500 ease-in-out ${
         isCollapsed ? 'h-0 p-0' : 'h-auto p-2'
       }`}
     >

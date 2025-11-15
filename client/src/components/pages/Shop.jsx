@@ -11,7 +11,7 @@ const Shop = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 md:py-8 lg:px-8">
       <motion.div className="mb-2 md:mb-8">
-        <h1 className="page-title !text-3xl font-bold">Shop By Collection</h1>
+        <h1 className="page-title text-3xl! font-bold">Shop By Collection</h1>
       </motion.div>
 
       <motion.div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
@@ -22,7 +22,7 @@ const Shop = () => {
               className="outline-foreground group block rounded-md p-2 transition-shadow duration-300 hover:shadow-xl"
             >
               <div className="relative overflow-hidden">
-                <div className="aspect-[4/5] max-h-80 w-full overflow-hidden">
+                <div className="aspect-4/5 max-h-80 w-full overflow-hidden">
                   <img
                     src={category.image}
                     alt={category.title}

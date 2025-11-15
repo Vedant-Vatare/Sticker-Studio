@@ -68,7 +68,7 @@ const Login = ({ isAsModal }) => {
   };
   return (
     <div
-      className={`md:bg-primary/5 relative flex items-center justify-center ${isAsModal ? 'h-full w-full' : 'h-[100dvh] md:p-4'}`}
+      className={`md:bg-primary/5 relative flex items-center justify-center ${isAsModal ? 'h-full w-full' : 'h-dvh md:p-4'}`}
     >
       <motion.div
         className="w-full max-w-md"
