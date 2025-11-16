@@ -40,6 +40,8 @@ const Cart = () => {
       { label: 'Home', path: '/' },
       { label: 'Cart', path: '/cart' },
     ]);
+
+    return () => setBreadcrumbs([]);
   }, []);
 
   if (isLoading) {

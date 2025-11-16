@@ -10,7 +10,6 @@ const AuthHeader = lazy(() => import('./components/pages/auth/AuthHeader'));
 const UserVerification = lazy(
   () => import('./components/pages/auth/UserVerification'),
 );
-
 const SetPassword = lazy(() => import('./components/pages/auth/SetupPassword'));
 const Login = lazy(() => import('./components/pages/auth/Login'));
 const Signup = lazy(() => import('./components/pages/auth/Signup'));
@@ -32,6 +31,7 @@ function App() {
           </Route>
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
+
             <Route path="/shop" element={<Shop />} />
             <Route path="/account" element={<>Account</>} />
             <Route path="/cart" element={<Cart />} />

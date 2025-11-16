@@ -1,8 +1,12 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { HomeIcon, ShoppingBag, User2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useUserStore } from '@/store/userStore';
 
 const MobileNavigationLayout = () => {
+  const navigate = useNavigate();
+  const isLoggedIn = useUserStore((store) => store.isLoggedIn);
   const path = useLocation().pathname;
   let currentPage = '';
 
@@ -15,6 +19,10 @@ const MobileNavigationLayout = () => {
   if (path === '/shop' || path.startsWith('/shop/')) currentPage = 'shop';
   if (path === '/account' || path.startsWith('/account/'))
     currentPage = 'account';
+
+  function handleAccountClick() {
+    if (!isLoggedIn) navigate('/auth/signup');
+  }
 
   return (
     <div className="font-heading fixed right-0 bottom-0 left-0 z-999 flex justify-around border-t border-gray-200 bg-white p-2 text-xs font-semibold tracking-wide md:hidden">
@@ -38,7 +46,10 @@ const MobileNavigationLayout = () => {
           Shop
         </span>
       </Link>
-      <Link to="/account" className="flex cursor-pointer flex-col items-center">
+      <button
+        onClick={handleAccountClick}
+        className="flex cursor-pointer flex-col items-center"
+      >
         <span
           className={`rounded-full p-3 transition-colors ${currentPage === 'account' ? 'bg-primary text-white' : 'bg-primary-foreground'}`}
         >
@@ -47,7 +58,7 @@ const MobileNavigationLayout = () => {
         <span className={`${currentPage === 'account' ? 'text-primary' : ''}`}>
           Account
         </span>
-      </Link>
+      </button>
     </div>
   );
 };

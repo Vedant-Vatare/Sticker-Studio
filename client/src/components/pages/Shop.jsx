@@ -1,5 +1,7 @@
+import { breadcrumbStore } from '@/store/globalStore';
 import { ShopCategoryImages } from '@/utils/images';
 import { motion } from 'motion/react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const fadeInUp = {
@@ -8,6 +10,17 @@ const fadeInUp = {
 };
 
 const Shop = () => {
+  const setBreadcrumbs = breadcrumbStore((store) => store.setBreadcrumbs);
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: 'home', path: '/' },
+      { label: 'shop', path: '/shop' },
+    ]);
+
+    return () => setBreadcrumbs([]);
+  }, []);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 md:py-8 lg:px-8">
       <motion.div className="mb-2 md:mb-8">

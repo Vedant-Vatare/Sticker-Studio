@@ -5,11 +5,12 @@ import { BorderTrail } from '../ui/border-trail';
 import { Button, buttonVariants } from '../ui/button';
 import { useCartQuery } from '@/hooks/cart';
 import { useNavigate } from 'react-router-dom';
+import useMediaQuery from '@/hooks/useMediaQuery';
 
 const RootHeaderLayout = () => {
   const navigate = useNavigate();
   const { data: cartItems } = useCartQuery();
-
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   const handleAccountClick = () => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -86,15 +87,17 @@ const RootHeaderLayout = () => {
               )}
               <ShoppingBagIcon className="h-5 w-5" />
             </Link>
-            <button
-              onClick={handleAccountClick}
-              className={`${buttonVariants({
-                variant: 'outline',
-                size: 'icon',
-              })} bg-primary-foreground relative inline-flex aspect-square h-10 w-10 cursor-pointer items-center justify-center p-0`}
-            >
-              <User2 className="h-5 w-5" />
-            </button>
+            {!!isDesktop && (
+              <button
+                onClick={handleAccountClick}
+                className={`${buttonVariants({
+                  variant: 'outline',
+                  size: 'icon',
+                })} bg-primary-foreground relative inline-flex aspect-square h-10 w-10 cursor-pointer items-center justify-center p-0`}
+              >
+                <User2 className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </div>
       </div>

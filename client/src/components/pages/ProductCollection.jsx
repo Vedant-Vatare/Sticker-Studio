@@ -4,6 +4,8 @@ import { useParams } from 'react-router-dom';
 import ProductGrid from '../product/ProductGrid';
 import { motion } from 'motion/react';
 import { Skeleton } from '../ui/skeleton';
+import { useEffect } from 'react';
+import { breadcrumbStore } from '@/store/globalStore';
 
 const ProductsCollection = () => {
   const { collectionSlug } = useParams();
@@ -15,6 +17,21 @@ const ProductsCollection = () => {
     queryKey: ['products', collectionSlug],
     queryFn: () => fetchProductsByCollection(collectionSlug),
   });
+  const setBreadcrumbs = breadcrumbStore((store) => store.setBreadcrumbs);
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: 'home', path: '/' },
+      { label: 'shop', path: '/shop' },
+      {
+        label: collectionSlug.split('-').join(' '),
+        path: `/shop/${collectionSlug}`,
+      },
+    ]);
+
+    return () => setBreadcrumbs([]);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
