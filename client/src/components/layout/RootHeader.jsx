@@ -1,4 +1,14 @@
-import { Search, ShoppingBagIcon, User2, Heart } from 'lucide-react';
+import {
+  Search,
+  ShoppingBagIcon,
+  User2,
+  Heart,
+  CircleHelpIcon,
+  DollarSignIcon,
+  ReceiptIcon,
+  SettingsIcon,
+  UserIcon,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import logo from '@/assets/logo.png';
 import { BorderTrail } from '../ui/border-trail';
@@ -6,6 +16,49 @@ import { Button, buttonVariants } from '../ui/button';
 import { useCartQuery } from '@/hooks/cart';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@/hooks/useMediaQuery';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const AccountDropDown = () => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Menu item with icon</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>User Profile</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+            <UserIcon />
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <SettingsIcon />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <ReceiptIcon />
+            Billing Plans
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <DollarSignIcon />
+            Pricing
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <CircleHelpIcon />
+            FAQ
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 const RootHeaderLayout = () => {
   const navigate = useNavigate();
