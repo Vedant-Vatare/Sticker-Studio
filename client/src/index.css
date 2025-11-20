@@ -213,6 +213,7 @@
 body {
   letter-spacing: var(--tracking-normal);
   font-family: var(--font-sans);
+  scrollbar-gutter: stable;
 }
 h1,
 h2,

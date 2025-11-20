@@ -3,16 +3,14 @@ import {
   ShoppingBagIcon,
   User2,
   Heart,
-  CircleHelpIcon,
-  DollarSignIcon,
-  ReceiptIcon,
   SettingsIcon,
-  UserIcon,
+  MapPin,
+  PackageIcon,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import logo from '@/assets/logo.png';
-import { BorderTrail } from '../ui/border-trail';
-import { Button, buttonVariants } from '../ui/button';
+import { BorderTrail } from '@/components/ui/border-trail';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { useCartQuery } from '@/hooks/cart';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@/hooks/useMediaQuery';
@@ -21,49 +19,15 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Separator } from '@/components/ui/separator';
+import useCurrentPage from '@/hooks/useCurrentPage';
 
-const AccountDropDown = () => {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">Menu item with icon</Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>User Profile</DropdownMenuLabel>
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <UserIcon />
-            Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <SettingsIcon />
-            Settings
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <ReceiptIcon />
-            Billing Plans
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <DollarSignIcon />
-            Pricing
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CircleHelpIcon />
-            FAQ
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
-
-const RootHeaderLayout = () => {
+const AccountButton = () => {
   const navigate = useNavigate();
-  const { data: cartItems } = useCartQuery();
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const path = useLocation().pathname;
+  const currentPage = useCurrentPage();
   const handleAccountClick = () => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -72,6 +36,79 @@ const RootHeaderLayout = () => {
       navigate('/auth/login');
     }
   };
+
+  return (
+    <DropdownMenu model={false}>
+      <DropdownMenuTrigger asChild>
+        <button
+          onClick={handleAccountClick}
+          className={`${buttonVariants({
+            variant: currentPage === 'account' ? 'default' : 'outline',
+            size: 'icon',
+          })} relative inline-flex aspect-square h-10 w-10 cursor-pointer items-center justify-center p-0`}
+        >
+          <User2 className="h-5 w-5" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="mt-2 mr-4 w-64 p-2">
+        <DropdownMenuGroup className="flex flex-col">
+          <DropdownMenuItem asChild>
+            <Link
+              to="/profile"
+              className={`flex w-full cursor-pointer gap-3 px-4 py-2.5 font-normal tracking-wide ${path === '/profile' && 'text-primary font-semibold'}`}
+            >
+              <User2 className="text-inherit" />
+              Profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              to="/orders"
+              className={`flex w-full cursor-pointer gap-3 px-4 py-2.5 font-normal tracking-wide ${path === '/orders' && 'text-primary font-semibold'}`}
+            >
+              <PackageIcon className="text-inherit" />
+              Orders
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              to="/wishlist"
+              className={`flex w-full cursor-pointer gap-3 px-4 py-2.5 font-normal tracking-wide ${path === '/wishlist' && 'text-primary font-semibold'}`}
+            >
+              <Heart className="text-inherit" />
+              Wishlist
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              to="/addresses"
+              className={`flex w-full cursor-pointer gap-3 px-4 py-2.5 font-normal tracking-wide ${path === '/addresses' && 'text-primary font-semibold'}`}
+            >
+              <MapPin className="text-inherit" />
+              Addresses
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <Separator className="bg-foreground/20 my-1" />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link
+              to="/settings"
+              className={`flex w-full cursor-pointer gap-3 px-4 py-2.5 font-normal tracking-wide ${path === '/settings' && 'text-primary font-semibold'}`}
+            >
+              <SettingsIcon className="text-inherit" />
+              Settings
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const RootHeaderLayout = () => {
+  const { data: cartItems } = useCartQuery();
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   return (
     <header className="sticky top-0 z-999 bg-white shadow-md">
@@ -109,23 +146,14 @@ const RootHeaderLayout = () => {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div className="hidden items-center gap-2 md:flex">
             <div className="relative min-w-10 lg:w-80">
               <InputSearchbar />
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Link
-              to="/wishlist"
-              className={`${buttonVariants({
-                variant: 'outline',
-                size: 'icon',
-              })} bg-primary-foreground relative inline-flex aspect-square h-10 w-10 items-center justify-center p-0`}
-            >
-              <Heart className="h-5 w-5" />
-            </Link>
+          <div className="flex items-center gap-4">
             <Link
               to="/cart"
               className={`${buttonVariants({
@@ -140,17 +168,7 @@ const RootHeaderLayout = () => {
               )}
               <ShoppingBagIcon className="h-5 w-5" />
             </Link>
-            {!!isDesktop && (
-              <button
-                onClick={handleAccountClick}
-                className={`${buttonVariants({
-                  variant: 'outline',
-                  size: 'icon',
-                })} bg-primary-foreground relative inline-flex aspect-square h-10 w-10 cursor-pointer items-center justify-center p-0`}
-              >
-                <User2 className="h-5 w-5" />
-              </button>
-            )}
+            {!!isDesktop && <AccountButton />}
           </div>
         </div>
       </div>
