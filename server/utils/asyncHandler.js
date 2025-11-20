@@ -3,7 +3,7 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
-} from '@prisma/client/runtime/library';
+} from '@prisma/client/runtime/client';
 function asyncHandler(handler) {
   function isPrismaError(err) {
     if (

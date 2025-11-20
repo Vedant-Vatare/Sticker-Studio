@@ -199,9 +199,7 @@ export async function getUserProfile(req, res) {
       id: true,
       full_name: true,
       email: true,
-      addresses: true,
-      Wishlist: true,
-      Order: true,
+      phone: true,
     },
   });
 
