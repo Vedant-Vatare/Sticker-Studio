@@ -200,6 +200,8 @@ export async function getUserProfile(req, res) {
       full_name: true,
       email: true,
       phone: true,
+      isMailVerified: true,
+      isPhoneVerified: true,
     },
   });
 

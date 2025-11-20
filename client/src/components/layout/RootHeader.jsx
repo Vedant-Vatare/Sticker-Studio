@@ -153,7 +153,16 @@ const RootHeaderLayout = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link
+              to="/cart"
+              className={`${buttonVariants({
+                variant: 'outline',
+                size: 'icon',
+              })} bg-primary-foreground relative inline-flex aspect-square h-10 w-10 items-center justify-center p-0 md:hidden`}
+            >
+              <Heart className="h-5 w-5" />
+            </Link>
             <Link
               to="/cart"
               className={`${buttonVariants({

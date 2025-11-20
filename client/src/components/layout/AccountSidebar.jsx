@@ -16,7 +16,7 @@ export function AccountSidebar() {
   const currentPage = useLocation().pathname;
 
   return (
-    <Sidebar className="w-60 p-2" side="right">
+    <Sidebar className="w-60 rounded-tl-xs rounded-bl-xs p-2" side="right">
       <SidebarHeader
         className={'mt-2 flex flex-row items-center justify-between pr-4'}
       >
