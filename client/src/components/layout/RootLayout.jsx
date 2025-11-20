@@ -4,6 +4,8 @@ import RootHeaderLayout from './RootHeader';
 import TopBanner from './TopBanner';
 import Footer from '../Footer';
 import ScrollManager from '@/utils/ScrollManager';
+import { SidebarProvider } from '../ui/sidebar';
+import { AccountSidebar } from './AccountSidebar';
 
 const RootLayout = () => {
   return (
@@ -15,7 +17,10 @@ const RootLayout = () => {
         <Outlet />
       </main>
       <Footer />
-      <MobileNavigationLayout />
+      <SidebarProvider defaultOpen={false} className={'z-999'}>
+        <MobileNavigationLayout />
+        <AccountSidebar />
+      </SidebarProvider>
     </>
   );
 };

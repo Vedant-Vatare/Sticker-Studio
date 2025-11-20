@@ -31,9 +31,11 @@ function App() {
           </Route>
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
-
             <Route path="/shop" element={<Shop />} />
-            <Route path="/account" element={<>Account</>} />
+            <Route path="/profile" element={<>profile</>} />
+            <Route path="/orders" element={<>orders</>} />
+            <Route path="/addresses" element={<>addresses</>} />
+            <Route path="/settings" element={<>settings</>} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route

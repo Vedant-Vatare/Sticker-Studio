@@ -1,25 +1,21 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { HomeIcon, ShoppingBag, User2 } from 'lucide-react';
 import { useUserStore } from '@/store/userStore';
+import { useSidebar } from '../ui/sidebar';
+import useCurrentPage from '@/hooks/useCurrentPage';
 
 const MobileNavigationLayout = () => {
+  const { toggleSidebar } = useSidebar();
   const navigate = useNavigate();
   const isLoggedIn = useUserStore((store) => store.isLoggedIn);
-  const path = useLocation().pathname;
-  let currentPage = '';
-
-  if (path === '/') currentPage = 'home';
-  if (path === '/shop' || path.startsWith('/shop/')) currentPage = 'shop';
-  if (path === '/account' || path.startsWith('/account/'))
-    currentPage = 'account';
-
-  if (path === '/') currentPage = 'home';
-  if (path === '/shop' || path.startsWith('/shop/')) currentPage = 'shop';
-  if (path === '/account' || path.startsWith('/account/'))
-    currentPage = 'account';
+  const currentPage = useCurrentPage();
 
   function handleAccountClick() {
-    if (!isLoggedIn) navigate('/auth/signup');
+    if (!isLoggedIn) {
+      navigate('/auth/signup');
+      return;
+    }
+    toggleSidebar();
   }
 
   return (
