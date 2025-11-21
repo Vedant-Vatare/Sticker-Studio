@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import {
   updateUserAddressSchema,
   userAddressSchema,
@@ -42,7 +43,15 @@ export async function validateUserLogin(req, res, next) {
 
 export async function validateUpdateProfile(req, res, next) {
   const { full_name, password } = req.body;
-  const { success, error, data } = updateProfileSchema.safeParse({ full_name });
+  const { success, error, data } = updateProfileSchema.safeParse({
+    full_name,
+    password,
+  });
+
+  if (password) {
+    data.password = await bcrypt.hash(password, 10);
+  }
+
   if (!success) {
     return res.status(400).json({
       message: 'Invalid data',
