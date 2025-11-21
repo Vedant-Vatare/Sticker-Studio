@@ -13,10 +13,12 @@ import {
   getUserProfile,
   sendVerificationCode,
   verifyEmailCode,
+  updateUserProfile,
 } from '../controllers/userController.js';
 import {
   validateCreateAddress,
   validateUpdateAddress,
+  validateUpdateProfile,
   validateUserLogin,
   validateUserSignup,
 } from '../middlewares/userValidation.js';
@@ -33,6 +35,13 @@ router.post(
   asyncHandler(createUserAddress),
 );
 router.get('/profile', authenticateUser, asyncHandler(getUserProfile));
+router.post(
+  '/profile',
+  authenticateUser,
+  validateUpdateProfile,
+  asyncHandler(updateUserProfile),
+);
+
 router.get('/address/all', authenticateUser, asyncHandler(getUserAllAddresses));
 router.get('/address/:id', authenticateUser, asyncHandler(getUserAddressById));
 router.patch(

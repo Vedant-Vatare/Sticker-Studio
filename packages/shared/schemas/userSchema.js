@@ -1,9 +1,28 @@
 import { z } from 'zod';
 
 export const userSchema = z.object({
+  full_name: z.string({ message: 'Invalid name format' }),
+  email: z.email({ message: 'Invalid email format' }),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, 'Invalid phone number '),
+  password: z.string().min(8, 'Password must be at least 8 characters long'),
+});
+
+export const userLoginSchema = z.object({
   email: z.email({ message: 'Invalid email format' }),
   password: z.string().min(8, 'Password must be at least 8 characters long'),
 });
+
+export const updateProfileSchema = userSchema
+  .pick({
+    full_name: true,
+    email: true,
+    phone: true,
+    password: true,
+  })
+  .partial();
 
 export const userAddressSchema = z.object({
   name: z

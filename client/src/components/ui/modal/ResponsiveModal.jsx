@@ -10,7 +10,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -23,7 +22,7 @@ const ResponsiveModal = ({
   children,
   trigger,
   title,
-  description,
+  description = '',
   open,
   onOpenChange,
   showCloseButton = false,
@@ -40,9 +39,7 @@ const ResponsiveModal = ({
         >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            {description && (
-              <DialogDescription>{description}</DialogDescription>
-            )}
+            <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
           {children}
         </DialogContent>
@@ -56,7 +53,7 @@ const ResponsiveModal = ({
       <DrawerContent className={'mb-2'}>
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
-          {description && <DrawerDescription>{description}</DrawerDescription>}
+          <DialogDescription>{description}</DialogDescription>
         </DrawerHeader>
         <div className="px-4">{children}</div>
         <DrawerFooter className="pt-2">

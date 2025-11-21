@@ -24,3 +24,13 @@ export const fetchUserProfile = async () => {
   });
   return response.data.user;
 };
+
+export const updateUserProfile = async (data) => {
+  const response = await axiosInstance.post('/user/profile', data, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  return response.data.user;
+};

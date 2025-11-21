@@ -215,6 +215,24 @@ export async function getUserProfile(req, res) {
   });
 }
 
+export async function updateUserProfile(req, res) {
+  const user = await prisma.user.update({
+    where: { id: req.userId },
+    data: req.updateData,
+    select: {
+      full_name: true,
+      email: true,
+      phone: true,
+      isMailVerified: true,
+      isPhoneVerified: true,
+    },
+  });
+
+  return res
+    .status(200)
+    .json({ message: 'profile updated successfully', user });
+}
+
 export async function createUserAddress(req, res) {
   try {
     const totalAddresses = await prisma.userAddress.count({

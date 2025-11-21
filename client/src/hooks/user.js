@@ -4,6 +4,7 @@ import {
   addUserAddress,
   fetchUserAddresses,
   fetchUserProfile,
+  updateUserProfile,
 } from '@/services/user';
 
 export const useUserAddresses = () => {
@@ -35,5 +36,19 @@ export const useUserProfile = () => {
     queryKey: ['user-profile'],
     queryFn: fetchUserProfile,
     enabled: isLoggedIn,
+  });
+};
+
+export const useUpdateUserProfile = () => {
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['user-profile'],
+    mutationFn: updateUserProfile,
+    enabled: isLoggedIn,
+
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(['user-profile'], updatedUser);
+    },
   });
 };
