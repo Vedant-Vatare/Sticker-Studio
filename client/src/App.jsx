@@ -6,6 +6,8 @@ import Home from './components/pages/Home';
 import ProductsCollection from './components/pages/ProductCollection';
 import { Toaster } from '@/components/ui/sonner';
 import { LoginModal } from './components/ui/modal/LoginModal';
+
+const Address = lazy(() => import('./components/pages/Address'));
 const Profile = lazy(() => import('./components/pages/Profile'));
 const AuthHeader = lazy(() => import('./components/pages/auth/AuthHeader'));
 const UserVerification = lazy(
@@ -35,7 +37,7 @@ function App() {
             <Route path="/shop" element={<Shop />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/orders" element={<>orders</>} />
-            <Route path="/addresses" element={<>addresses</>} />
+            <Route path="/addresses" element={<Address />} />
             <Route path="/settings" element={<>settings</>} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />

@@ -15,6 +15,11 @@ export const addUserAddress = async (addressData) => {
   return response.data.userAddress;
 };
 
+export const removeUserAddress = async (addressId) => {
+  const response = await axiosInstance.delete(`/user/address/${addressId}`);
+  return response.data;
+};
+
 export const fetchUserProfile = async () => {
   const response = await axiosInstance.get('/user/profile', {
     headers: {
@@ -26,11 +31,6 @@ export const fetchUserProfile = async () => {
 };
 
 export const updateUserProfile = async (data) => {
-  const response = await axiosInstance.post('/user/profile', data, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  });
+  const response = await axiosInstance.post('/user/profile', data);
   return response.data.user;
 };

@@ -4,6 +4,7 @@ import {
   addUserAddress,
   fetchUserAddresses,
   fetchUserProfile,
+  removeUserAddress,
   updateUserProfile,
 } from '@/services/user';
 
@@ -24,8 +25,27 @@ export const useAddUserAddress = () => {
     mutationKey: ['add-user-address'],
     mutationFn: (addressData) => addUserAddress(addressData),
     enabled: isLoggedIn,
-    onSuccess: () => {
-      queryClient.invalidateQueries(['user-addresses']);
+    onSuccess: (newAddress) => {
+      queryClient.setQueryData(['user-addresses'], (oldAddresses = []) => {
+        return [...oldAddresses, newAddress];
+      });
+    },
+  });
+};
+
+export const useRemoveUserAddress = () => {
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['remove-user-address'],
+    mutationFn: (addressId) => removeUserAddress(addressId),
+    enabled: isLoggedIn,
+    onSuccess: (_, removedId) => {
+      queryClient.setQueryData(['user-addresses'], (addresses) => {
+        console.log(addresses, removedId);
+
+        return addresses?.filter((ad) => ad != removedId);
+      });
     },
   });
 };

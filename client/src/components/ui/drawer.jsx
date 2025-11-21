@@ -4,7 +4,7 @@ import { Drawer as DrawerPrimitive } from 'vaul';
 import { cn } from '@/lib/utils';
 
 function Drawer({ ...props }) {
-  return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
+  return <DrawerPrimitive.Root data-slot="drawer" {...props} dis />;
 }
 
 function DrawerTrigger({ ...props }) {

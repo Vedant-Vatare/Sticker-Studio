@@ -10,6 +10,7 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -26,8 +27,9 @@ const ResponsiveModal = ({
   open,
   onOpenChange,
   showCloseButton = false,
+  query = '(min-width: 500px)',
 }) => {
-  const isDesktop = useMediaQuery('(min-width: 500px)');
+  const isDesktop = useMediaQuery(query);
 
   if (isDesktop) {
     return (
@@ -50,10 +52,10 @@ const ResponsiveModal = ({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent className={'mb-2'}>
+      <DrawerContent>
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
         <div className="px-4">{children}</div>
         <DrawerFooter className="pt-2">
