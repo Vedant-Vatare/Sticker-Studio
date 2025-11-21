@@ -30,42 +30,58 @@ router.post('/signup', validateUserSignup, asyncHandler(createUser));
 router.post('/login', validateUserLogin, asyncHandler(LoginUser));
 router.post(
   '/address',
-  authenticateUser,
+  asyncHandler(authenticateUser),
   validateCreateAddress,
   asyncHandler(createUserAddress),
 );
-router.get('/profile', authenticateUser, asyncHandler(getUserProfile));
+router.get(
+  '/profile',
+  asyncHandler(authenticateUser),
+  asyncHandler(getUserProfile),
+);
 router.post(
   '/profile',
-  authenticateUser,
-  validateUpdateProfile,
+  asyncHandler(authenticateUser),
+  asyncHandler(validateUpdateProfile),
   asyncHandler(updateUserProfile),
 );
 
-router.get('/address/all', authenticateUser, asyncHandler(getUserAllAddresses));
-router.get('/address/:id', authenticateUser, asyncHandler(getUserAddressById));
+router.get(
+  '/address/all',
+  asyncHandler(authenticateUser),
+  asyncHandler(getUserAllAddresses),
+);
+router.get(
+  '/address/:id',
+  asyncHandler(authenticateUser),
+  asyncHandler(getUserAddressById),
+);
 router.patch(
   '/address/:id',
-  authenticateUser,
+  asyncHandler(authenticateUser),
   validateUpdateAddress,
   asyncHandler(updateUserAddress),
 );
 router.delete(
   '/address/:id',
-  authenticateUser,
+  asyncHandler(authenticateUser),
   asyncHandler(deleteUserAddress),
 );
 
 router.post(
   '/wishlist/:id',
-  authenticateUser,
+  asyncHandler(authenticateUser),
   asyncHandler(addProductToWishlist),
 );
 
-router.get('/wishlist', authenticateUser, asyncHandler(getUserWishlist));
+router.get(
+  '/wishlist',
+  asyncHandler(authenticateUser),
+  asyncHandler(getUserWishlist),
+);
 router.delete(
   '/wishlist/:id',
-  authenticateUser,
+  asyncHandler(authenticateUser),
   asyncHandler(deleteUserWishlist),
 );
 

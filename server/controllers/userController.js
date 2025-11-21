@@ -234,50 +234,37 @@ export async function updateUserProfile(req, res) {
 }
 
 export async function createUserAddress(req, res) {
-  try {
-    const totalAddresses = await prisma.userAddress.count({
-      where: { userId: req.userId },
+  const totalAddresses = await prisma.userAddress.count({
+    where: { userId: req.userId },
+  });
+  if (totalAddresses >= 3) {
+    return res.status(400).json({
+      message: 'Address limit reached. You can only add up to 3 addresses.',
     });
-    if (totalAddresses >= 3) {
-      return res.status(400).json({
-        message: 'Address limit reached. You can only add up to 3 addresses.',
-      });
-    }
-
-    const userAddress = await prisma.userAddress.create({
-      data: {
-        userId: req.userId,
-        ...req.body,
-      },
-    });
-
-    return res.status(201).json({
-      message: 'User address created successfully.',
-      userAddress,
-    });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: 'Error creating user address.', error: error.message });
   }
+
+  const userAddress = await prisma.userAddress.create({
+    data: {
+      userId: req.userId,
+      ...req.body,
+    },
+  });
+
+  return res.status(201).json({
+    message: 'User address created successfully.',
+    userAddress,
+  });
 }
 
 export async function getUserAllAddresses(req, res) {
-  try {
-    const addresses = await prisma.userAddress.findMany({
-      where: { userId: req.userId },
-    });
+  const addresses = await prisma.userAddress.findMany({
+    where: { userId: req.userId },
+  });
 
-    return res.status(200).json({
-      message: 'User addresses fetched successfully.',
-      addresses,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: 'Error retrieving user addresses.',
-      error: error.message,
-    });
-  }
+  return res.status(200).json({
+    message: 'User addresses fetched successfully.',
+    addresses,
+  });
 }
 
 export async function getUserAddressById(req, res) {
@@ -302,10 +289,7 @@ export async function getUserAddressById(req, res) {
       return res.status(404).json({ message: 'Address not found.' });
     }
 
-    return res.status(500).json({
-      message: 'Error retrieving user address.',
-      error: error.message,
-    });
+    throw error;
   }
 }
 
@@ -337,37 +321,30 @@ export async function updateUserAddress(req, res) {
 }
 
 export async function deleteUserAddress(req, res) {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    if (!id) {
-      return res.status(400).json({ message: 'Address id is required.' });
-    }
-
-    const address = await prisma.userAddress.findUnique({
-      where: {
-        id,
-        userId: req.userId,
-      },
-    });
-
-    if (!address) {
-      return res.status(404).json({ message: 'Address not found.' });
-    }
-
-    await prisma.userAddress.delete({
-      where: { id },
-    });
-
-    return res.status(200).json({
-      message: 'User address deleted successfully.',
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: 'Error deleting user address.',
-      error: error.message,
-    });
+  if (!id) {
+    return res.status(400).json({ message: 'Address id is required.' });
   }
+
+  const address = await prisma.userAddress.findUnique({
+    where: {
+      id,
+      userId: req.userId,
+    },
+  });
+
+  if (!address) {
+    return res.status(404).json({ message: 'Address not found.' });
+  }
+
+  await prisma.userAddress.delete({
+    where: { id },
+  });
+
+  return res.status(200).json({
+    message: 'User address deleted successfully.',
+  });
 }
 
 export async function addProductToWishlist(req, res) {
@@ -405,31 +382,20 @@ export async function addProductToWishlist(req, res) {
         .status(409)
         .json({ message: 'Product is already in wishlist.' });
     }
-
-    res.status(500).json({
-      message: 'Error adding product to wishlist.',
-      error: error.message,
-    });
+    throw error;
   }
 }
 
 export async function getUserWishlist(req, res) {
-  try {
-    const wishlist = await prisma.wishlist.findMany({
-      where: { userId: req.userId },
-      include: { product: true },
-    });
+  const wishlist = await prisma.wishlist.findMany({
+    where: { userId: req.userId },
+    include: { product: true },
+  });
 
-    res.status(200).json({
-      message: 'User wishlist fetched successfully.',
-      wishlist,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error fetching user wishlist.',
-      error: error.message,
-    });
-  }
+  res.status(200).json({
+    message: 'User wishlist fetched successfully.',
+    wishlist,
+  });
 }
 
 export async function deleteUserWishlist(req, res) {
@@ -438,29 +404,22 @@ export async function deleteUserWishlist(req, res) {
     return res.status(401).json({ message: 'Product id is required' });
   }
 
-  try {
-    const wishlistItem = await prisma.wishlist.findUnique({
-      where: {
-        id,
-        userId: req.userId,
-      },
-    });
+  const wishlistItem = await prisma.wishlist.findUnique({
+    where: {
+      id,
+      userId: req.userId,
+    },
+  });
 
-    if (!wishlistItem) {
-      return res.status(404).json({ message: 'Wishlist item not found.' });
-    }
-
-    await prisma.wishlist.delete({
-      where: { id },
-    });
-
-    res.status(200).json({
-      message: 'Product was removed from wishlist .',
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error removing product from wishlist.',
-      error: error.message,
-    });
+  if (!wishlistItem) {
+    return res.status(404).json({ message: 'Wishlist item not found.' });
   }
+
+  await prisma.wishlist.delete({
+    where: { id },
+  });
+
+  res.status(200).json({
+    message: 'Product was removed from wishlist .',
+  });
 }

@@ -1,34 +1,28 @@
 import prisma from '../db/db.js';
 
 export async function getUserCart(req, res) {
-  try {
-    const cart = await prisma.userCart.findMany({
-      where: { userId: req.userId },
-      select: {
-        id: true,
-        quantity: true,
-        product: {
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            images: true,
-            price: true,
-            stock: true,
-          },
+  const cart = await prisma.userCart.findMany({
+    where: { userId: req.userId },
+    select: {
+      id: true,
+      quantity: true,
+      product: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          images: true,
+          price: true,
+          stock: true,
         },
       },
-      orderBy: { createdAt: 'desc' },
-    });
-    if (!cart) {
-      return res.status(404).json({ message: 'Cart not found' });
-    }
-    res.json({ message: 'Cart fetched successfully', cart });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Error fetching cart', error: error.message });
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  if (!cart) {
+    return res.status(404).json({ message: 'Cart not found' });
   }
+  res.json({ message: 'Cart fetched successfully', cart });
 }
 
 export async function addToCart(req, res) {
@@ -53,8 +47,8 @@ export async function addToCart(req, res) {
         .status(409)
         .json({ message: 'Product already in cart', error: e.message });
     }
-    console.log(e);
-    res.status(500).json({ message: 'Error adding to cart', error: e.message });
+
+    throw error;
   }
 }
 
@@ -76,9 +70,7 @@ export async function updateCartItem(req, res) {
     if (error.code === 'P2025') {
       return res.status(400).json({ message: 'Cart item not found' });
     }
-    res
-      .status(500)
-      .json({ message: 'Error updating cart item', error: error.message });
+    throw error;
   }
 }
 
@@ -100,8 +92,6 @@ export async function removeFromCart(req, res) {
     if (error.code === 'P2025') {
       return res.status(400).json({ message: 'Cart item not found' });
     }
-    res
-      .status(500)
-      .json({ message: 'Error removing cart item', error: error.message });
+    throw error;
   }
 }

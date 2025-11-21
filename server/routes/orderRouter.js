@@ -10,7 +10,7 @@ import { validateCreateOrder } from '../middlewares/orderValidation.js';
 
 const router = Router();
 
-router.use(authenticateUser);
+router.use(asyncHandler(authenticateUser));
 router.get('/', asyncHandler(getOrder));
 router.post('/create-order', validateCreateOrder, asyncHandler(createOrder));
 router.post('/verify-order', asyncHandler(verifyOrder));

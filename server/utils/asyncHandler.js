@@ -16,8 +16,10 @@ function asyncHandler(handler) {
     }
     return false;
   }
+
   return function (req, res, next) {
     Promise.resolve(handler(req, res, next)).catch((error) => {
+      console.log(error);
       if (isPrismaError(error)) {
         error.message = 'Something went wrong. please try again later';
       }

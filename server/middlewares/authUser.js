@@ -31,29 +31,24 @@ export async function authenticateAdmin(req, res, next) {
 }
 
 export async function authenticateUser(req, res, next) {
-  try {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) {
-      return res.status(403).json({
-        message: 'service not available',
-        error: 'invalid authentication token',
-      });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await prisma.user.findFirst({
-      where: { id: decoded.userId },
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) {
+    return res.status(403).json({
+      message: 'service not available',
+      error: 'invalid authentication token',
     });
-    if (!user) {
-      return res.status(403).json({
-        message: 'service not available',
-        error: 'not a verified user. please login',
-      });
-    }
-    [req.userId, req.userType] = [user.id, 'USER'];
-    next();
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Error authenticating user', error: error.message });
   }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await prisma.user.findFirst({
+    where: { id: decoded.userId },
+  });
+
+  if (!user) {
+    return res.status(403).json({
+      message: 'service not available',
+      error: 'not a verified user. please login',
+    });
+  }
+  [req.userId, req.userType] = [user.id, 'USER'];
+  next();
 }

@@ -10,7 +10,7 @@ import {
 import { validateUpdateCart } from '../middlewares/cartvalidation.js';
 const router = Router();
 
-router.use(authenticateUser);
+router.use(asyncHandler(authenticateUser));
 router.get('/', asyncHandler(getUserCart));
 router.post('/add', asyncHandler(addToCart));
 router.put('/', validateUpdateCart, asyncHandler(updateCartItem));
