@@ -77,6 +77,17 @@ function DrawerHeader({ className, ...props }) {
   );
 }
 
+function DrawerBody({ className, ...props }) {
+  return (
+    <div
+      data-slot="drawer-body"
+      className={cn('overflow-y-scroll px-4 pb-4', className)}
+      style={{ scrollbarWidth: 'thin', scrollbarColor: '#d1d5db #f3f4f6' }}
+      {...props}
+    />
+  );
+}
+
 function DrawerFooter({ className, ...props }) {
   return (
     <div
@@ -115,6 +126,7 @@ export {
   DrawerClose,
   DrawerContent,
   DrawerHeader,
+  DrawerBody,
   DrawerFooter,
   DrawerTitle,
   DrawerDescription,

@@ -89,7 +89,7 @@ const Checkout = () => {
 
   if (cartItems?.length === 0) {
     return (
-      <div className="bg-background min-h-screen">
+      <div className="bg-muted min-h-screen">
         <div className="mx-auto max-w-7xl px-2 py-8 sm:px-6 lg:px-8">
           <Card className="flex flex-col items-center justify-center py-16">
             <ShoppingBag className="text-muted-foreground mb-4 h-16 w-16" />
@@ -106,25 +106,24 @@ const Checkout = () => {
   }
 
   return (
-    <div className="bg-background min-h-screen pb-8">
-      <div className="mx-auto max-w-3xl px-2 py-8 sm:px-6 lg:px-8">
-        <div className="mb-5">
-          <h1 className="text-foreground page-title">Checkout</h1>
-        </div>
+    <div className="bg-muted min-h-screen pb-8">
+      <div className="mx-auto max-w-4xl px-2 py-8 sm:px-6 lg:px-8">
+        <h2 className="section-title text-base!">Checkout</h2>
 
         {!isLoggedIn && (
           <div className="border-border bg-info/60 mb-6 border p-4">
             <p className="text-foreground font-body text-center font-bold">
-              Please{' '}
-              <Button
+              Please
+              <Link
+                to={'/auth/login'}
                 variant={'ghost'}
                 className={
-                  'text-primary bg-transparent p-2 text-base font-semibold hover:bg-transparent hover:underline'
+                  'text-primary bg-transparent p-1 text-base font-semibold hover:bg-transparent hover:underline'
                 }
               >
-                Login
-              </Button>{' '}
-              to proceed with checkout
+                log in
+              </Link>
+              to your account to proceed with checkout
             </p>
           </div>
         )}
@@ -132,7 +131,7 @@ const Checkout = () => {
           shippingAddressId={shippingAddressId}
           setShippingAddressId={setShippingAddressId}
         />
-        <Card className="border-border bg-muted/30 gap-3 rounded-xs border p-4 md:p-6">
+        <Card className="border-border gap-3 rounded-xs border p-4 md:p-6">
           <h2 className="text-foreground font-medium!">Order Summary</h2>
 
           <div className="space-y-4">

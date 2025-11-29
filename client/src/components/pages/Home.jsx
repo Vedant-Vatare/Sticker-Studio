@@ -90,7 +90,7 @@ const HeroSection = () => {
               className="text-3xl font-bold tracking-tight lg:mt-7 xl:text-5xl"
               variants={fadeInUp}
             >
-              <TextEffect preset="slide" per="word">
+              <TextEffect preset="slide" per="word" className={'font-bold'}>
                 Stickers for everything you like
               </TextEffect>
             </motion.h1>

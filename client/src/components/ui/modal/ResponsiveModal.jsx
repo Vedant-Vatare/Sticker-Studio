@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import {
   Drawer,
+  DrawerBody,
   DrawerClose,
   DrawerContent,
   DrawerDescription,
@@ -57,7 +58,9 @@ const ResponsiveModal = ({
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
-        <div className="px-4">{children}</div>
+        <DrawerBody>
+          <div className="px-4">{children}</div>
+        </DrawerBody>
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>

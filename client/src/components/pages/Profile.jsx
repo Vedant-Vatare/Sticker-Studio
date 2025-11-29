@@ -1,14 +1,13 @@
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import ResponsiveModal from '../ui/modal/ResponsiveModal';
-import { useState } from 'react';
 import { useUpdateUserProfile, useUserProfile } from '@/hooks/user';
 import LoadingDots from '../ui/LoadingDots';
 import ServerError from './ServerError';
-import { EyeIcon } from 'lucide-react';
-import { EyeOff } from 'lucide-react';
+import { EyeIcon, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AddFullNameForm = ({ closeModal }) => {

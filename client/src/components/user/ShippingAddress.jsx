@@ -1,23 +1,52 @@
-import { useAddUserAddress, useUserAddresses } from '@/hooks/user';
-import { Card, CardContent } from '../ui/card';
 import { useEffect, useState } from 'react';
-import { Skeleton } from '../ui/skeleton';
-import { MapPin, Edit2, Plus } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Separator } from '@radix-ui/react-separator';
-import { SelectedAddressDisplay } from './address/SelectedAddressDisplay';
-import { AddressSelectionDialog } from './address/AddressSelectionDialog';
-import { AddAddressDialog } from './address/AddAddressDialog';
+
+import { useAddUserAddress, useUserAddresses } from '@/hooks/user';
+import { MapPin, PlusCircleIcon } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import ResponsiveModal from '@/components/ui/modal/ResponsiveModal';
+import { AddressModal } from './address/AddressModal';
+import { AddressCard } from './address/AddressCard';
+
+const ChangeShippingAddress = ({
+  addresses,
+  shippingAddressId,
+  setShippingAddressId,
+  closeModal,
+}) => {
+  return (
+    <div className="flex w-full flex-1 flex-col gap-1 px-1 sm:gap-3">
+      {addresses.map((addr) => (
+        <div className="relative" key={addr.id}>
+          <AddressCard
+            address={addr}
+            className="cursor-pointer py-1 sm:py-2"
+            onClick={() => {
+              setShippingAddressId(addr.id);
+              closeModal();
+            }}
+          />
+          {shippingAddressId === addr.id && (
+            <Badge variant="info" className="absolute top-2 right-2">
+              Selected
+            </Badge>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export const ShippingAddressSection = ({
   shippingAddressId,
   setShippingAddressId,
 }) => {
   const { data: addresses = [], isLoading } = useUserAddresses();
-  const { mutateAsync: addAddress, isPending: isAdding } = useAddUserAddress();
-  const [changeOpen, setChangeOpen] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
-
+  const [openNewAddressModal, setOpenNewAddressModal] = useState(false);
+  const [openChangeAddressModal, setOpenChangeAddressModal] = useState(false);
+  const { mutate: addNewAddress, isPending, isSuccess } = useAddUserAddress();
   useEffect(() => {
     if (addresses.length) {
       setShippingAddressId(
@@ -26,11 +55,13 @@ export const ShippingAddressSection = ({
     }
   }, [addresses]);
 
-  const selected = addresses.find((a) => a.id === shippingAddressId);
+  const SelectedShippingAddress = addresses.find(
+    (a) => a.id === shippingAddressId,
+  );
 
   if (isLoading)
     return (
-      <Card className="border-border bg-muted/40 mb-3 rounded-lg border p-4 md:p-6">
+      <Card className="border-border mb-3 rounded-lg border p-4 md:p-6">
         <div className="mb-4 flex items-center gap-2">
           <Skeleton className="h-5 w-5 rounded-full" />
           <Skeleton className="h-6 w-36" />
@@ -40,64 +71,75 @@ export const ShippingAddressSection = ({
     );
 
   return (
-    <Card className="bg-muted/30 my-4 rounded-none">
-      <CardContent className="px-2 md:p-4">
+    <Card className="my-2 gap-2 rounded-none py-3">
+      <CardContent className="px-2 md:p-3">
         <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <MapPin className="h-4 w-4" />
-            <h2 className="font-semibold">Shipping Address</h2>
-          </div>
-          {addresses.length > 0 && (
-            <Button
-              variant="outline"
-              className={'rounded-sm p-1 px-2'}
-              size="xs"
-              onClick={() => setChangeOpen(true)}
+          <h2 className="section-title text-base!">Shipping Address</h2>
+
+          {addresses.length > 1 && (
+            <ResponsiveModal
+              onOpenChange={setOpenChangeAddressModal}
+              open={openChangeAddressModal}
+              showCloseButton={true}
+              trigger={
+                <Button
+                  disabled={addresses?.length < 1}
+                  variant={'outline'}
+                  size={'sm'}
+                  className={'font-medium'}
+                >
+                  <span>Change</span>
+                </Button>
+              }
+              title="Your Addresses"
             >
-              <Edit2 className="h-3 w-3" /> Change
-            </Button>
+              <ChangeShippingAddress
+                addresses={addresses}
+                shippingAddressId={shippingAddressId}
+                setShippingAddressId={setShippingAddressId}
+                closeModal={() => setOpenChangeAddressModal(false)}
+              />
+            </ResponsiveModal>
           )}
         </div>
-        <Separator className="mb-4" />
 
-        {selected ? (
-          <SelectedAddressDisplay address={selected} />
-        ) : (
-          <Button
-            onClick={() => setAddOpen(true)}
-            variant="outline"
-            className="w-full"
-          >
-            <Plus className="h-4 w-4" /> Add Shipping Address
-          </Button>
-        )}
-        {changeOpen && (
-          <AddressSelectionDialog
-            isOpen={changeOpen}
-            selectedId={shippingAddressId}
-            onOpenChange={setChangeOpen}
-            addresses={addresses}
-            shippingAddressId={shippingAddressId}
-            onSelect={(id) => {
-              setShippingAddressId(id);
-              setChangeOpen(false);
-            }}
-            onAddNew={() => {
-              setChangeOpen(false);
-              setAddOpen(true);
-            }}
-          />
-        )}
-        {addOpen && (
-          <AddAddressDialog
-            isOpen={addOpen}
-            onOpenChange={setAddOpen}
-            onSubmit={addAddress}
-            isSubmitting={isAdding}
-            currentCount={addresses.length}
+        {SelectedShippingAddress && (
+          <AddressCard
+            className="border-none bg-inherit p-2!"
+            address={SelectedShippingAddress}
           />
         )}
       </CardContent>
+      {addresses.length < 3 && (
+        <ResponsiveModal
+          onOpenChange={setOpenNewAddressModal}
+          open={openNewAddressModal}
+          showCloseButton={true}
+          trigger={
+            <Button
+              disabled={addresses?.length >= 3}
+              variant={'ghost'}
+              size={'sm'}
+              className={'text-primary mx-3 mt-3 font-semibold'}
+            >
+              <>
+                <PlusCircleIcon className="h-7 w-7" />
+                <span>Add new address</span>
+              </>
+            </Button>
+          }
+          title="Add new Address"
+        >
+          <AddressModal
+            open={openNewAddressModal}
+            onOpenChange={setOpenNewAddressModal}
+            closeModal={() => setOpenNewAddressModal(false)}
+            onSubmit={addNewAddress}
+            isPending={isPending}
+            isSuccess={isSuccess}
+          />
+        </ResponsiveModal>
+      )}
     </Card>
   );
 };
