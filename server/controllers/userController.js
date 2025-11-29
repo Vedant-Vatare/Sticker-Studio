@@ -246,7 +246,7 @@ export async function createUserAddress(req, res) {
   const userAddress = await prisma.userAddress.create({
     data: {
       userId: req.userId,
-      ...req.body,
+      ...req.parsedAddress,
     },
   });
 
@@ -301,11 +301,11 @@ export async function updateUserAddress(req, res) {
 
   const updatedAddress = await prisma.userAddress.update({
     where: { id },
-    data: req.body,
+    data: req.body.updatedAddress,
   });
 
   // removing other default address
-  if (req.body.isDefault) {
+  if (req.body.updatedAddress.isDefault) {
     await prisma.userAddress.updateMany({
       where: {
         userId: req.userId,
@@ -314,6 +314,7 @@ export async function updateUserAddress(req, res) {
       data: { isDefault: false },
     });
   }
+
   return res.status(200).json({
     message: 'User address updated successfully.',
     address: updatedAddress,

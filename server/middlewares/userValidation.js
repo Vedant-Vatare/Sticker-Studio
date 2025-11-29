@@ -63,19 +63,21 @@ export async function validateUpdateProfile(req, res, next) {
 }
 
 export async function validateCreateAddress(req, res, next) {
-  const { error } = userAddressSchema.safeParse(req.body);
+  const { error, data } = userAddressSchema.safeParse(req.body);
   if (error) {
     return res.status(401).json({
       success: false,
       status: 'error',
-      message: error.issues.map((issue) => issue.message).join(', '),
+      message: z.treeifyError(error),
     });
   }
+  req.parsedAddress = data;
   next();
 }
 
 export async function validateUpdateAddress(req, res, next) {
-  const { error } = updateUserAddressSchema.safeParse(req.body);
+  const { error, data } = updateUserAddressSchema.safeParse(req.body.address);
+
   if (error) {
     return res.status(401).json({
       success: false,
@@ -83,5 +85,6 @@ export async function validateUpdateAddress(req, res, next) {
       message: error.issues.map((issue) => issue.message).join(', '),
     });
   }
+  req.body.updatedAddress = data;
   next();
 }

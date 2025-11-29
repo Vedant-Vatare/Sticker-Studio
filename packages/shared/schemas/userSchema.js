@@ -51,4 +51,10 @@ export const userAddressSchema = z.object({
   country: z.string().min(2).max(50).default('India'),
 });
 
-export const updateUserAddressSchema = userAddressSchema.partial();
+export const updateUserAddressSchema = userAddressSchema
+  .extend({
+    isDefault: z
+      .boolean({ error: 'default option should be either true or false' })
+      .optional(),
+  })
+  .partial();

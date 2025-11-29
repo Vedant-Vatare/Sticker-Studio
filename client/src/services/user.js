@@ -20,6 +20,13 @@ export const removeUserAddress = async (addressId) => {
   return response.data;
 };
 
+export const updateUserAddress = async (address) => {
+  const response = await axiosInstance.patch(`/user/address/${address.id}`, {
+    address,
+  });
+  return response.data.address;
+};
+
 export const fetchUserProfile = async () => {
   const response = await axiosInstance.get('/user/profile', {
     headers: {

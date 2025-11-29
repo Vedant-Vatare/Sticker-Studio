@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Input } from '@/components/ui/input';
@@ -5,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
-import { useAddUserAddress, useUserAddresses } from '@/hooks/user';
+import { useUserAddresses } from '@/hooks/user';
 import {
   Dialog,
   DialogTitle,
@@ -27,12 +28,12 @@ const fields = [
     label: 'Phone Number',
     placeholder: 'Enter phone number',
     type: 'tel',
-    maxLength: 10,
+    length: 10,
     span: 'full',
   },
   {
     name: 'address',
-    label: 'Street Address',
+    label: 'Address',
     placeholder: 'Flat/House number, Building, Street',
     span: 'full',
   },
@@ -41,69 +42,26 @@ const fields = [
     name: 'pincode',
     label: 'Pincode',
     placeholder: 'Enter pincode',
-    type: 'text',
-    maxLength: 6,
+    type: 'number',
+    length: 6,
     span: 'half',
   },
   { name: 'state', label: 'State', placeholder: 'Enter state', span: 'full' },
 ];
-export const AddNewAddressModal = ({ closeModal, open, onOpenChange }) => {
-  const { mutate: addNewAddress, isPending, isSuccess } = useAddUserAddress();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-  });
 
-  const hasFormData = Object.values(formData).some((field) => field.length > 0);
-
-  useEffect(() => {
-    if (!open && hasFormData && !isSuccess) {
-      setShowConfirmDialog(true);
-      onOpenChange(true);
-    }
-  }, [open]);
-
-  const handleConfirmClose = () => {
-    setShowConfirmDialog(false);
-    setFormData({
-      name: '',
-      phone: '',
-      address: '',
-      city: '',
-      state: '',
-      pincode: '',
-    });
-    closeModal();
-  };
-
-  const handleCancelClose = () => {
-    setShowConfirmDialog(false);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    addNewAddress(formData, {
-      onSuccess: () => {
-        closeModal();
-      },
-    });
-  };
-
-  const { data: addresses } = useUserAddresses();
-  useEffect(() => {
-    if (addresses?.length >= 3) {
-      toast.error('Address limit reached (3 max).');
+const ShowConfirmationDialog = memo(
+  ({ showConfirmDialog, setShowConfirmDialog, closeModal, resetForm }) => {
+    const handleConfirmClose = () => {
+      resetForm();
+      setShowConfirmDialog(false);
       closeModal();
-    }
-  }, [addresses?.length]);
+    };
 
-  return (
-    <>
+    const handleCancelClose = () => {
+      setShowConfirmDialog(false);
+    };
+
+    return (
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
@@ -126,9 +84,72 @@ export const AddNewAddressModal = ({ closeModal, open, onOpenChange }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    );
+  },
+);
+
+// this modal is to be shown when updating or creating an address only
+export const AddressModal = ({
+  open,
+  onOpenChange,
+  closeModal,
+  address = {},
+  onSubmit,
+  isPending,
+  isSuccess,
+}) => {
+  const initialFormData = {
+    name: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    ...address,
+  };
+  const [formData, setFormData] = useState(initialFormData);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const isFormEdited = Object.keys(formData).some(
+    (key) => formData[key] !== initialFormData[key],
+  );
+
+  // open confirmation dialog if user was editing and the form was not submitted
+  useEffect(() => {
+    if (!open && isFormEdited && !isSuccess && !showConfirmDialog) {
+      onOpenChange(true);
+      setShowConfirmDialog(true);
+    }
+  }, [open, isFormEdited, isSuccess, showConfirmDialog]);
+
+  const resetForm = () => {
+    setFormData(initialFormData);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData, {
+      onSuccess: () => {
+        closeModal();
+      },
+
+      onError: (e) => {
+        toast.error('Something went wrong');
+      },
+    });
+  };
+
+  return (
+    <>
+      <ShowConfirmationDialog
+        showConfirmDialog={showConfirmDialog}
+        closeModal={closeModal}
+        setShowConfirmDialog={setShowConfirmDialog}
+        resetForm={resetForm}
+      />
 
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:gap-4 md:gap-y-6">
           {fields.map((field, i) => (
             <motion.div
               key={field.name}
@@ -140,20 +161,23 @@ export const AddNewAddressModal = ({ closeModal, open, onOpenChange }) => {
               <div className="group relative w-full">
                 <Label
                   htmlFor={field.name}
-                  className="bg-background text-foreground font-body absolute top-0 left-2 z-1 block -translate-y-1/2 rounded-md px-1 text-xs font-semibold tracking-wide"
+                  className="bg-background text-foreground font-body absolute top-0 left-2 z-1 block -translate-y-1/2 rounded-md px-1 text-xs font-semibold tracking-wide md:text-sm"
                 >
                   {field.label}
                 </Label>
                 <Input
                   id={field.name}
                   name={field.name}
-                  maxLength={field.maxLength || undefined}
-                  type={field.type}
                   value={formData[field.name]}
+                  type={field.type}
+                  maxLength={field.length}
+                  minLength={field.length}
+                  length={field.length}
+                  required={field.required || true}
                   onChange={(e) =>
                     setFormData({ ...formData, [field.name]: e.target.value })
                   }
-                  className="bg-muted/50 h-10 w-full"
+                  className="bg-muted h-10 w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 />
               </div>
             </motion.div>
@@ -162,7 +186,7 @@ export const AddNewAddressModal = ({ closeModal, open, onOpenChange }) => {
         <Button
           type="submit"
           className="mt-3 h-9 w-full rounded-sm"
-          disabled={isPending}
+          disabled={isPending || !isFormEdited}
         >
           {isPending ? 'Saving...' : 'Save Address'}
         </Button>
