@@ -1,13 +1,17 @@
-import { nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid';
 import prisma from '../db/db.js';
 import razorpay from '../utils/razorpay.js';
 import crypto from 'crypto';
+const customOrderId = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 8);
 
 export async function getOrder(req, res) {
   try {
     const orders = await prisma.order.findMany({
       where: { userId: req.userId },
       include: { orderItems: { include: { product: true } } },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
     res.status(200).json({ message: 'order details fetched', orders });
   } catch (error) {
@@ -23,11 +27,12 @@ export async function createOrder(req, res) {
     const discount = req.orderData.totalAmount > 999 ? 100 : 0;
     const shippingCharges = 20;
     const totalAmount = req.orderData.totalAmount - discount + shippingCharges;
+    const ORDER_ID = `ORD-${customOrderId()}`;
 
     const razorpayOptions = {
       amount: Math.round(totalAmount * 100),
       currency: 'INR',
-      receipt: `order_${nanoid()}`,
+      receipt: ORDER_ID,
       notes: {
         userId: req.userId,
       },
@@ -37,6 +42,7 @@ export async function createOrder(req, res) {
 
     const order = await prisma.order.create({
       data: {
+        id: ORDER_ID,
         userId: req.userId,
         orderItems: {
           create: req.orderData.orderItems.map((item) => ({
