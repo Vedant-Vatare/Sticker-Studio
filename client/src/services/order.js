@@ -12,3 +12,12 @@ export const verifyPayment = async (paymentData) => {
   const response = await api.post('/order/verify-order', paymentData);
   return response.data;
 };
+
+export const fetchOrders = async () => {
+  const response = await api.get('/order', {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  return response.data.orders;
+};

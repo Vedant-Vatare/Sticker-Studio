@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { LoginModal } from './components/ui/modal/LoginModal';
 
 const Address = lazy(() => import('./components/pages/Address'));
+const Order = lazy(() => import('./components/pages/Order'));
 const Profile = lazy(() => import('./components/pages/Profile'));
 const AuthHeader = lazy(() => import('./components/pages/auth/AuthHeader'));
 const UserVerification = lazy(
@@ -36,7 +37,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/orders" element={<>orders</>} />
+            <Route path="/orders" element={<Order />} />
             <Route path="/addresses" element={<Address />} />
             <Route path="/settings" element={<>settings</>} />
             <Route path="/cart" element={<Cart />} />

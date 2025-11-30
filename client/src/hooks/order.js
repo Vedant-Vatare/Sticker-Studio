@@ -1,6 +1,6 @@
-import { createOrder } from '@/services/order';
+import { createOrder, fetchOrders } from '@/services/order';
 import { useUserStore } from '@/store/userStore';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 export const usePlaceOrder = () => {
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
@@ -9,5 +9,14 @@ export const usePlaceOrder = () => {
     mutationFn: async (orderData) => createOrder(orderData),
     enabled: isLoggedIn,
     staleTime: Infinity,
+  });
+};
+
+export const useFetchOrders = () => {
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+  return useQuery({
+    queryKey: ['orders'],
+    queryFn: fetchOrders,
+    enabled: isLoggedIn,
   });
 };

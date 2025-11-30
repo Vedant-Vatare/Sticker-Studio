@@ -4,7 +4,7 @@ const ACCOUNT_PAGES = [
   '/profile',
   '/orders',
   '/wishlist',
-  '/address',
+  '/addresses',
   '/settings',
 ];
 const useCurrentPage = () => {
