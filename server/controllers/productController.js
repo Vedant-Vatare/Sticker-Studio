@@ -40,32 +40,92 @@ export async function getProductById(req, res) {
 }
 
 export async function getProductsBySearch(req, res) {
-  const { search } = req.params;
   try {
-    const products = await prisma.product.findMany({
-      where: {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
-        ],
-      },
-      orderBy: { name: 'asc' },
-    });
-
-    if (products.length === 0) {
-      return res.status(404).json({
-        message: 'No products found.',
-        products: [],
+    const q = req.query.q?.trim();
+    if (!q || q.length < 3)
+      return res.status(403).json({
+        message: 'search result not found',
+        error: '',
       });
-    }
+    const limit = Number(req.query.limit) || 20;
+    const offset = Number(req.query.offset) || 0;
 
-    return res
-      .status(200)
-      .json({ message: 'Products fetched successfully.', products });
+    const products = await prisma.$queryRaw`
+     SELECT
+  p.id,
+  p.name,
+  p.description,
+  p.price,
+  p.images,
+  p.stock,
+  p."createdAt" as "createdAt",
+  p."updatedAt" as "updatedAt",
+  COALESCE(
+    json_agg(
+      json_build_object(
+        'id', pc.id,
+        'category', json_build_object(
+          'id', c.id,
+          'name', c.name,
+          'slug', c.slug
+        )
+      )
+    ) FILTER (WHERE pc.id IS NOT NULL),
+    '[]'::json
+  ) as "ProductCategory"
+FROM "Product" p
+LEFT JOIN "ProductCategory" pc ON p.id = pc."productId"
+LEFT JOIN "Category" c ON pc."categoryId" = c.id
+WHERE 
+  to_tsvector('english', 
+    p.name || ' ' || 
+    COALESCE(p.description, '') || ' ' ||
+    COALESCE((
+      SELECT string_agg(c2.name || ' ' || c2.slug, ' ')
+      FROM "ProductCategory" pc2
+      JOIN "Category" c2 ON pc2."categoryId" = c2.id
+      WHERE pc2."productId" = p.id
+    ), '')
+  ) @@ plainto_tsquery('english', ${q})
+GROUP BY 
+  p.id, 
+  p.name, 
+  p.description, 
+  p.price, 
+  p.images, 
+  p.stock, 
+  p."createdAt",
+  p."updatedAt"
+ORDER BY 
+  ts_rank(
+    to_tsvector('english', 
+      p.name || ' ' || 
+      COALESCE(p.description, '') || ' ' ||
+      COALESCE((
+        SELECT string_agg(c2.name || ' ' || c2.slug, ' ')
+        FROM "ProductCategory" pc2
+        JOIN "Category" c2 ON pc2."categoryId" = c2.id
+        WHERE pc2."productId" = p.id
+      ), '')
+    ),
+    plainto_tsquery('english', ${q})
+  ) DESC
+LIMIT ${limit}
+OFFSET ${offset}
+    `;
+
+    const formattedProducts = products.map((product) => ({
+      ...product,
+      ProductCategory: product.ProductCategory || [],
+    }));
+
+    return res.json({ products: formattedProducts });
   } catch (error) {
-    return res.status(500).json({ message: 'Error fetching products.', error });
+    console.error('Search error:', error);
+    return res.status(500).json({ message: 'Error fetching products.' });
   }
 }
+
 export async function getProductRecommendation(req, res) {
   const { success, error, data } = productRecommendationSchema.safeParse(
     req.query,

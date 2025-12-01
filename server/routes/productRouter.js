@@ -29,7 +29,7 @@ router.post(
   asyncHandler(createProduct),
 );
 
-router.get('/bulk/:search', asyncHandler(getProductsBySearch));
+router.get('/search', asyncHandler(getProductsBySearch));
 router.get('/collection', asyncHandler(getProductsByCollection));
 router.get('/recommendations', asyncHandler(getProductRecommendation));
 router.get('/:id', asyncHandler(getProductById));
