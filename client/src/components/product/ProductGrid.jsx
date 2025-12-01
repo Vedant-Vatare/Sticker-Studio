@@ -15,6 +15,13 @@ const staggerContainer = {
     },
   },
 };
+const formatPrice = (amount) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
 
 const ProductGrid = ({ products, showAddToCartBtn }) => {
   const { data: cartItems } = useCartQuery();
@@ -62,8 +69,8 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
                 {product.name}
               </span>
 
-              <span className="block font-mono text-lg font-semibold">
-                Rs.{product.price}
+              <span className="font-body block text-lg font-semibold">
+                {formatPrice(product.price)}
               </span>
             </div>
             {showAddToCartBtn && (

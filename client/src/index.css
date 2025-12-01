@@ -4,8 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-heading: 'Poppins', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Lato', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Anek Latin', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Anek Latin', ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -56,8 +56,8 @@
   --info-light: #dbeafe;
 
   @theme {
-    --font-sans: 'Lato', ui-sans-serif, system-ui, sans-serif;
-    --font-serif: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Anek Latin', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Anek Latin', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, monospace;
   }
 
@@ -212,7 +212,7 @@
 
 body {
   letter-spacing: var(--tracking-normal);
-  font-family: var(--font-sans);
+  font-family: 'Anek Latin', ui-sans-serif, system-ui, sans-serif;
   scrollbar-gutter: stable;
 }
 h1,
@@ -221,9 +221,14 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
-  font-weight: 600;
+  font-weight: 700;
 }
+
+body,
+p {
+  font-weight: 400;
+}
+
 svg {
   min-width: 1rem;
   min-height: 1rem;
@@ -241,7 +246,6 @@ img {
 .page-title {
   font-size: 1.5rem;
   line-height: 2.25rem;
-  font-weight: 600;
 }
 
 @media (max-width: 768px) {

@@ -74,7 +74,7 @@ const presetVariants = {
 };
 
 const AnimationComponent = React.memo(
-  ({ segment, variants, per, segmentWrapperClassName }) => {
+  ({ segment, variants, per, className, segmentWrapperClassName }) => {
     const content =
       per === 'line' ? (
         <motion.span variants={variants} className="block">
@@ -84,7 +84,7 @@ const AnimationComponent = React.memo(
         <motion.span
           aria-hidden="true"
           variants={variants}
-          className="inline-block whitespace-pre"
+          className={cn('inline-block whitespace-pre', className)}
         >
           {segment}
         </motion.span>
@@ -232,6 +232,7 @@ export function TextEffect({
             <AnimationComponent
               key={`${per}-${index}-${segment}`}
               segment={segment}
+              className={className}
               variants={computedVariants.item}
               per={per}
               segmentWrapperClassName={segmentWrapperClassName}
