@@ -23,6 +23,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import useCurrentPage from '@/hooks/useCurrentPage';
+import { useState } from 'react';
+import { useRef } from 'react';
 
 const AccountButton = () => {
   const navigate = useNavigate();
@@ -192,15 +194,32 @@ const RootHeaderLayout = () => {
 };
 
 const InputSearchbar = () => {
+  const [query, setQuery] = useState('');
+  const navigate = useNavigate();
+  const inputRef = useRef(null);
+  const handleSearch = () => {
+    navigate(`/search/${query}`);
+  };
+
   return (
     <div className="relative flex h-full w-full items-center overflow-hidden rounded-sm">
       <input
         type="text"
+        value={query}
+        ref={inputRef}
+        onInput={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            inputRef.current.blur();
+            handleSearch();
+          }
+        }}
         name="search"
-        placeholder="Search..."
+        onSubmit={() => console.log('subbmited..')}
         className="focus:ring-accent text-md h-max w-full rounded-sm border border-gray-300 p-2 px-4 pr-10 font-sans focus:ring-2 focus:outline-none"
       />
       <Button
+        onClick={handleSearch}
         variant={'outline'}
         className="bg-muted absolute right-2 my-1 flex h-8 w-8 items-center justify-center rounded-full p-0"
       >

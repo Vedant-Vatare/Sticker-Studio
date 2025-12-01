@@ -1,4 +1,4 @@
-import { fetchProductsByCollection } from '@/services/product/collection';
+import { fetchProductsByCollection } from '@/services/product/product';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import ProductGrid from '../product/ProductGrid';

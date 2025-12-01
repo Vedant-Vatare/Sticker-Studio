@@ -20,6 +20,7 @@ const Signup = lazy(() => import('./components/pages/auth/Signup'));
 const Cart = lazy(() => import('./components/pages/Cart'));
 const Checkout = lazy(() => import('./components/pages/Checkout'));
 const Shop = lazy(() => import('./components/pages/Shop'));
+const ProductSearch = lazy(() => import('./components/pages/ProductSearch'));
 const PageNotFound = lazy(() => import('./components/pages/PageNotFound'));
 const ServerError = lazy(() => import('./components/pages/ServerError'));
 function App() {
@@ -36,6 +37,7 @@ function App() {
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/search/:query" element={<ProductSearch />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/orders" element={<Order />} />
             <Route path="/addresses" element={<Address />} />
