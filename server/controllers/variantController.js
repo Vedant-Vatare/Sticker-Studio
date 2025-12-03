@@ -1,6 +1,95 @@
 import prisma from '../db/db.js';
 
-export const createOption = async (req, res) => {
+const generateSKU = (productId, options) => {
+  const sorted = options.sort((a, b) => a.name.localeCompare(b.name));
+  const parts = sorted.map(
+    (opt) => `${opt.name.toUpperCase()}-${opt.value.toUpperCase()}`,
+  );
+  return `${productId}-${parts.join('&')}`;
+};
+
+export async function createProductVariant(req, res) {
+  const optionIds = req.productVariantData.variant;
+  const options = await prisma.option.findMany({
+    where: {
+      id: {
+        in: optionIds,
+      },
+    },
+  });
+  const validIds = new Set(options.map((o) => o.id));
+
+  const invalidIds = optionIds.filter((id) => !validIds.has(id));
+
+  if (invalidIds.length > 0) {
+    return res
+      .status(400)
+      .json({ error: 'variant contains invalid ids', invalidIds });
+  }
+  const SKU = generateSKU(req.productVariantData.productId, options);
+
+  const productVariant = await prisma.productVariant.create({
+    data: {
+      ...req.productVariantData,
+      sku: SKU,
+    },
+  });
+  return res
+    .status(201)
+    .json({ message: 'productVariant added successfully', productVariant });
+}
+
+export async function getAllVariants(req, res) {
+  const { productId } = req.params;
+  const productVariants = await prisma.productVariant.findMany({
+    where: {
+      productId,
+    },
+  });
+  const varientIds = productVariants.map((v) => v.variant).flat(2);
+
+  const options = await prisma.option.findMany({
+    where: {
+      id: {
+        in: varientIds,
+      },
+    },
+  });
+  return res.status(200).json({
+    message: 'variants fetched successfully',
+    productVariants,
+    options,
+  });
+}
+
+export async function updateProductVariant(req, res) {
+  const { id } = req.params;
+  const productVariant = await prisma.productVariant.update({
+    where: { id },
+    data: req.updateData,
+  });
+
+  return res
+    .status(200)
+    .json({ message: 'product variant was updated', productVariant });
+}
+export async function deleteProductVariant(req, res) {
+  try {
+    const { id } = req.params;
+    await prisma.productVariant.delete({
+      where: { id },
+    });
+    return res
+      .status(200)
+      .json({ message: 'product variant was deleted successfully' });
+  } catch (e) {
+    if ((e.code = 'P2025')) {
+      return res.status(400).json({ error: 'product variant not found' });
+    }
+  }
+}
+
+export async function createOption(req, res) {
   try {
     const option = await prisma.option.create({
       data: req.body,
@@ -24,7 +113,7 @@ export const createOption = async (req, res) => {
       error: error.message,
     });
   }
-};
+}
 
 export async function getAllOptions(_, res) {
   const options = await prisma.option.findMany({});

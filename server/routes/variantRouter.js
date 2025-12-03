@@ -3,17 +3,36 @@ import { authenticateAdmin } from '../middlewares/authUser.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import {
   createOption,
+  createProductVariant,
   deleteOption,
+  deleteProductVariant,
   getAllOptions,
+  getAllVariants,
   getOptionByName,
   updateOption,
+  updateProductVariant,
 } from '../controllers/variantController.js';
 import {
   validateCreateOption,
+  validateCreateVariant,
   validateUpdateOption,
+  validateUpdateVariant,
 } from '../middlewares/variantValidation.js';
 const router = Router();
-// managing product options
+
+router.post(
+  '/add',
+  [authenticateAdmin, validateCreateVariant],
+  createProductVariant,
+);
+router.get('/:productId', asyncHandler(getAllVariants));
+router.put(
+  '/:id',
+  [authenticateAdmin, validateUpdateVariant],
+  asyncHandler(updateProductVariant),
+);
+router.delete('/:id', authenticateAdmin, asyncHandler(deleteProductVariant));
+
 router.post(
   '/option',
   [authenticateAdmin, validateCreateOption],
@@ -27,7 +46,5 @@ router.put(
   asyncHandler(updateOption),
 );
 router.delete('/option/:id', authenticateAdmin, asyncHandler(deleteOption));
-
-// managing product variants
 
 export default router;
