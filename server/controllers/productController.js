@@ -51,15 +51,16 @@ export async function getProductsBySearch(req, res) {
     const offset = Number(req.query.offset) || 0;
 
     const products = await prisma.$queryRaw`
-     SELECT
+SELECT
   p.id,
   p.name,
   p.description,
+  p."basePrice",
   p.price,
   p.images,
   p.stock,
-  p."createdAt" as "createdAt",
-  p."updatedAt" as "updatedAt",
+  p."createdAt",
+  p."updatedAt",
   COALESCE(
     json_agg(
       json_build_object(
@@ -77,39 +78,18 @@ FROM "Product" p
 LEFT JOIN "ProductCategory" pc ON p.id = pc."productId"
 LEFT JOIN "Category" c ON pc."categoryId" = c.id
 WHERE 
-  to_tsvector('english', 
-    p.name || ' ' || 
-    COALESCE(p.description, '') || ' ' ||
-    COALESCE((
-      SELECT string_agg(c2.name || ' ' || c2.slug, ' ')
-      FROM "ProductCategory" pc2
-      JOIN "Category" c2 ON pc2."categoryId" = c2.id
-      WHERE pc2."productId" = p.id
-    ), '')
-  ) @@ plainto_tsquery('english', ${q})
+  p."searchVector" @@ plainto_tsquery('english', ${q})
+  OR EXISTS (
+    SELECT 1
+    FROM "ProductCategory" pc2
+    JOIN "Category" c2 ON pc2."categoryId" = c2.id
+    WHERE pc2."productId" = p.id
+      AND to_tsvector('english', c2.name || ' ' || c2.slug) @@ plainto_tsquery('english', ${q})
+  )
 GROUP BY 
-  p.id, 
-  p.name, 
-  p.description, 
-  p.price, 
-  p.images, 
-  p.stock, 
-  p."createdAt",
-  p."updatedAt"
+  p.id
 ORDER BY 
-  ts_rank(
-    to_tsvector('english', 
-      p.name || ' ' || 
-      COALESCE(p.description, '') || ' ' ||
-      COALESCE((
-        SELECT string_agg(c2.name || ' ' || c2.slug, ' ')
-        FROM "ProductCategory" pc2
-        JOIN "Category" c2 ON pc2."categoryId" = c2.id
-        WHERE pc2."productId" = p.id
-      ), '')
-    ),
-    plainto_tsquery('english', ${q})
-  ) DESC
+  ts_rank(p."searchVector", plainto_tsquery('english', ${q})) DESC
 LIMIT ${limit}
 OFFSET ${offset}
     `;
@@ -136,6 +116,7 @@ export async function getProductRecommendation(req, res) {
       error: z.treeifyError(error),
     });
   }
+
   const {
     'productId[]': productIds,
     'categorySlug[]': categorySlugs,
