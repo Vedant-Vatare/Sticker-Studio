@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import prisma from '../db/db.js';
-import { productRecommendationSchema } from '../schemas/productSchema.js';
+import { productRecommendationSchema } from 'shared/schemas/productSchema.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
 
 export async function createProduct(req, res) {

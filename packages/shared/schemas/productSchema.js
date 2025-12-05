@@ -14,6 +14,7 @@ const productSchema = z.object({
     .transform((val) => (val ? val.trim() : val)),
 
   price: z.coerce.number().min(1, 'Price is required.'),
+  basePrice: z.coerce.number().min(1, 'Price is required.'),
 
   stock: z.coerce
     .number()
@@ -24,7 +25,14 @@ const productSchema = z.object({
 });
 
 export const productCreateSchema = productSchema;
-export const updateProductSchema = productSchema.partial();
+export const updateProductSchema = productSchema
+  .extend({
+    stock: z.coerce
+      .number()
+      .min(0, 'Stock must be a valid non-negative number')
+      .optional(),
+  })
+  .partial();
 
 export const productCollectionSchema = z
   .object({

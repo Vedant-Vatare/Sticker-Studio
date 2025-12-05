@@ -19,6 +19,7 @@ export async function validateCreateProduct(req, res, next) {
 }
 
 export async function validateUpdateProduct(req, res, next) {
+  console.log({ body: req.body });
   const zodResult = updateProductSchema.safeParse(req.body);
 
   if (!zodResult.success) {
@@ -27,6 +28,8 @@ export async function validateUpdateProduct(req, res, next) {
       error: zodResult.error.issues,
     });
   }
+  console.log(zodResult.data);
+
   req.validatedBody = zodResult.data;
 
   next();
