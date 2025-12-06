@@ -32,7 +32,7 @@ export async function getProductDetails(id) {
 export async function getProductvariant(id) {
   const response = await axios.get(`/variant/${id}`);
   return {
-    ...response.data.productVariants,
+    variants: response.data.productVariants,
     options: response.data.options,
   };
 }

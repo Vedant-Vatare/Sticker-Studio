@@ -7,6 +7,14 @@ import { useMemo } from 'react';
 import { ShoppingBagIcon } from 'lucide-react';
 import { useCartQuery } from '@/hooks/cart';
 import { Skeleton } from '../ui/skeleton';
+import { create } from 'zustand';
+import { useEffect } from 'react';
+import { CloudRain } from 'lucide-react';
+import { Separator } from '../ui/separator';
+import { Truck } from 'lucide-react';
+import { RefreshCcw } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 const ProductPageSkeleton = () => {
   return (
@@ -78,8 +86,7 @@ const ProductPageSkeleton = () => {
   );
 };
 
-const ShowOptions = ({ name, values }) => {
-  const [selectedOption, setSelectedOption] = useState(values[0].id);
+const ShowOptions = ({ name, values, selectedVariant, setSelectedVariant }) => {
   if (name === 'Color') {
     return (
       <div className="ml-2">
@@ -90,16 +97,21 @@ const ShowOptions = ({ name, values }) => {
           {values.map((color) => (
             <button
               key={color.id}
-              onClick={() => setSelectedOption(color.id)}
-              className={`relative h-9 w-9 rounded-full border-2 transition ${
-                selectedOption === color.id
+              onClick={() =>
+                setSelectedVariant((variant) => ({
+                  ...variant,
+                  Color: color.id,
+                }))
+              }
+              className={`relative h-9 w-9 rounded-full border transition ${
+                selectedVariant.Color === color.id
                   ? 'border-primary scale-110'
                   : 'border-border hover:border-primary/50'
               }`}
               style={{ backgroundColor: color.value }}
               title={color.value}
             >
-              {selectedOption === color.id && (
+              {selectedVariant.Color === color.id && (
                 <Check className="text-foreground absolute inset-0 m-auto h-5 w-5" />
               )}
             </button>
@@ -119,13 +131,18 @@ const ShowOptions = ({ name, values }) => {
           <Button
             size={'icon'}
             variant={'outline'}
-            className={`size-8 text-sm ${
-              selectedOption === option.id
+            className={`size-10 text-sm ${
+              selectedVariant[name] === option.id
                 ? 'border-primary scale-110'
                 : 'border-border hover:border-primary/50'
             }`}
             key={option.id}
-            onClick={() => setSelectedOption(option.id)}
+            onClick={() =>
+              setSelectedVariant((variant) => ({
+                ...variant,
+                [name]: option.id,
+              }))
+            }
             title={option.value}
           >
             {option.value}
@@ -140,18 +157,22 @@ export default function ProductPage() {
   const { productId } = useParams();
   const { data: product, isLoading: productLoading } =
     useProductDetails(productId);
-  const { data: variants, isLoading: variantLoading } =
+  const { data: variantDetails, isLoading: variantLoading } =
     useProductVariant(productId);
   const { data: cartItems } = useCartQuery();
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(true);
+  const [isVariantAvailable, setIsVariantAvailable] = useState(true);
+  const [selectedVariant, setSelectedVariant] = useState({});
 
   const groupedOptions = useMemo(() => {
-    if (!variants?.options || variants.options.length === 0) return [];
+    if (!variantDetails?.options || variantDetails.options.length === 0)
+      return [];
 
     const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL'];
 
-    return variants.options
+    return variantDetails.options
       .reduce((acc, currentOption) => {
         const optionName = currentOption.name;
         const optionIndex = acc.findIndex((opt) => opt.name === optionName);
@@ -188,7 +209,29 @@ export default function ProductPage() {
         return option;
       })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [variants]);
+  }, [variantDetails]);
+
+  useEffect(() => {
+    if (groupedOptions.length > 0) {
+      const initialVariant = {};
+      groupedOptions.forEach((option) => (initialVariant[option.name] = ''));
+      setSelectedVariant(initialVariant);
+    }
+  }, [groupedOptions]);
+  const getSelectedVariantDetails = useMemo(() => {
+    const variantIds = Object.values(selectedVariant);
+
+    if (!variantDetails || variantIds.some((id) => id === '')) {
+      return null;
+    } else {
+      const variantFound = variantDetails.variants?.find((variantDetails) => {
+        return variantDetails.variant.every((v, i) => {
+          return variantIds.includes(v);
+        });
+      });
+      variantFound ? setIsVariantAvailable(false) : setIsVariantAvailable(true);
+    }
+  }, [variantDetails, selectedVariant]);
 
   if (productLoading || variantLoading) {
     return <ProductPageSkeleton />;
@@ -280,14 +323,14 @@ export default function ProductPage() {
             </div>
           </div>
 
-          <div className="relative flex flex-col gap-5">
+          <div className="relative flex flex-col gap-3">
             <div>
               <h1 className="text-foreground font-heading mb-3 text-2xl font-semibold sm:text-2xl">
                 {product.name}
               </h1>
             </div>
 
-            <div className="border-b pb-4">
+            <div className="pb-4">
               <div className="flex items-baseline gap-3">
                 <span className="text-foreground text-2xl font-bold">
                   ₹{product.price}
@@ -299,12 +342,14 @@ export default function ProductPage() {
                 )}
               </div>
             </div>
-
+            <Separator />
             {groupedOptions.map((option) => (
               <ShowOptions
                 key={option.name}
                 name={option.name}
                 values={option.values}
+                selectedVariant={selectedVariant}
+                setSelectedVariant={setSelectedVariant}
               />
             ))}
 
@@ -313,8 +358,18 @@ export default function ProductPage() {
                 {product.stock <= 0 && <b>Out of Stock</b>}
               </span>
             </div>
+            {variantDetails.options.length > 0 && (
+              <div className="ml-2 flex items-center text-lg">
+                <span className="text-destructive tracking-wide">
+                  {Object.values(selectedVariant).every((id) => id !== '') &&
+                    isVariantAvailable && (
+                      <b>Selected variant is not available</b>
+                    )}
+                </span>
+              </div>
+            )}
 
-            <div className="flex justify-evenly gap-3 px-2 pt-2">
+            <div className="my-2 flex justify-evenly gap-3 px-2">
               <Button className="flex-1 rounded-sm text-base" size="lg">
                 Buy Now
               </Button>
@@ -337,6 +392,26 @@ export default function ProductPage() {
                   Add to Cart
                 </Button>
               )}
+            </div>
+            <Separator />
+            <div className="grid grid-cols-2 place-items-start gap-2 text-xs select-none">
+              <span>
+                <Truck className="bg-muted/50 m-2 size-9 rounded-full p-2" />
+                Fast Delivery
+              </span>
+              <span>
+                <RefreshCcw className="bg-muted/50 m-2 size-9 rounded-full p-2" />
+                Easy Returns
+              </span>
+
+              <span>
+                <ShieldCheck className="bg-muted/50 m-2 size-9 rounded-full p-2" />
+                Secure Payments
+              </span>
+              <span>
+                <CheckCircle2 className="bg-muted/50 m-2 size-9 rounded-full p-2" />
+                Quality product
+              </span>
             </div>
           </div>
         </div>
