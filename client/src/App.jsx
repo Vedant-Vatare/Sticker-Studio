@@ -6,6 +6,7 @@ import Home from './components/pages/Home';
 import ProductsCollection from './components/pages/ProductCollection';
 import { Toaster } from '@/components/ui/sonner';
 import { LoginModal } from './components/ui/modal/LoginModal';
+import ProductPage from './components/pages/ProductDetails';
 
 const Address = lazy(() => import('./components/pages/Address'));
 const Order = lazy(() => import('./components/pages/Order'));
@@ -38,6 +39,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/search/:query" element={<ProductSearch />} />
+            <Route path="/product/:productId" element={<ProductPage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/orders" element={<Order />} />
             <Route path="/addresses" element={<Address />} />

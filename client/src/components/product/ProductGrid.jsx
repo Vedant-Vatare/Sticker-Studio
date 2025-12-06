@@ -23,7 +23,7 @@ const formatPrice = (amount) => {
   }).format(amount);
 };
 
-const ProductGrid = ({ products, showAddToCartBtn }) => {
+const ProductGrid = ({ products, showAddToCartBtn, onClick }) => {
   const { data: cartItems } = useCartQuery();
   const { mutateAsync: addToCartQuery } = useAddToCartQuery();
 
@@ -38,6 +38,7 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
         {products.map((product, index) => (
           <motion.div
             key={index}
+            onClick={() => onClick(product.id)}
             className="outline-foreground flex h-full w-full cursor-pointer flex-col items-center justify-between rounded-sm p-2"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
@@ -49,7 +50,7 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
             }}
             whileHover={{ scale: 1.05, y: -5 }}
           >
-            <div className="bg-muted relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-md">
+            <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-md">
               <img
                 loading="lazy"
                 src={product.image || product.images[0]}
@@ -81,7 +82,10 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => addToCartQuery(product)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCartQuery(product);
+                    }}
                     variant={'outline'}
                     className="mt-1 w-full self-start outline"
                   >

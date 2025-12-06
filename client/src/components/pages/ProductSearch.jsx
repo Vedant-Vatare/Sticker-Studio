@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useSearchProducts } from '@/hooks/product';
 import { Skeleton } from '../ui/skeleton';
@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { SearchX } from 'lucide-react';
 
 const ProductSearch = () => {
+  const navigate = useNavigate();
   const { query } = useParams();
   const {
     data: searchedProducts,
@@ -46,6 +47,9 @@ const ProductSearch = () => {
     toast.error(error.response.data.message || 'something went wrong');
   }
 
+  const goToProductDetails = (id) => {
+    navigate(`/product/${id}`, { target: 'blank' });
+  };
   const products = searchedProducts?.pages.flatMap((batch) => batch);
   if (products.length > 0) {
     return (
@@ -53,7 +57,11 @@ const ProductSearch = () => {
         <motion.div>
           <h1 className="page-title">{query}</h1>
         </motion.div>
-        <ProductGrid products={products} showAddToCartBtn={true} />
+        <ProductGrid
+          onClick={goToProductDetails}
+          products={products}
+          showAddToCartBtn={true}
+        />
         {hasNextPage && (
           <Button
             className={'mt-5 rounded-sm p-3 px-4 text-base'}
