@@ -1,11 +1,11 @@
-import { success, z } from 'zod';
+import { z } from 'zod';
 import {
   optionSchema,
   productVariantSchema,
   updateProductVariantSchema,
   updateOptionSchema,
-} from '../../packages/shared/schemas/variantSchema.js';
-import prisma from '../db/db.js';
+} from 'shared/schemas/product/variantSchema.js';
+import prisma from '../../db/db.js';
 
 const validateNewVariants = async (newProductVariant, excludeId) => {
   try {

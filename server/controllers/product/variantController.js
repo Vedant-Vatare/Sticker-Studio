@@ -1,4 +1,4 @@
-import prisma from '../db/db.js';
+import prisma from '../../db/db.js';
 
 const generateSKU = (productId, options) => {
   const sorted = options.sort((a, b) => a.name.localeCompare(b.name));

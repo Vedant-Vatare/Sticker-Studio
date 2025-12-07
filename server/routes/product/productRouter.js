@@ -1,10 +1,10 @@
 import Router from 'express';
-import upload from '../utils/multerConfig.js';
+import upload from '../../utils/multerConfig.js';
 import {
   validateCreateProduct,
   validateProductCollection,
   validateUpdateProduct,
-} from '../middlewares/productValidation.js';
+} from '../../middlewares/product/productValidation.js';
 import {
   createProduct,
   createProductCollection,
@@ -15,9 +15,9 @@ import {
   getProductsByCollection,
   getProductsBySearch,
   updateProduct,
-} from '../controllers/productController.js';
-import asyncHandler from '../utils/asyncHandler.js';
-import { authenticateAdmin } from '../middlewares/authUser.js';
+} from '../../controllers/product/productController.js';
+import asyncHandler from '../../utils/asyncHandler.js';
+import { authenticateAdmin } from '../../middlewares/authUser.js';
 
 const router = Router();
 

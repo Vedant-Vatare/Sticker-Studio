@@ -2,7 +2,7 @@ import {
   productCollectionSchema,
   productCreateSchema,
   updateProductSchema,
-} from 'shared/schemas/productSchema.js';
+} from 'shared/schemas/product/productSchema.js';
 
 export async function validateCreateProduct(req, res, next) {
   const zodResult = productCreateSchema.safeParse(req.body);

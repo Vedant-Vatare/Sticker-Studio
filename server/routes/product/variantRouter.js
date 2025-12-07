@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { authenticateAdmin } from '../middlewares/authUser.js';
-import asyncHandler from '../utils/asyncHandler.js';
+import { authenticateAdmin } from '../../middlewares/authUser.js';
+import asyncHandler from '../../utils/asyncHandler.js';
 import {
   createOption,
   createProductVariant,
@@ -11,13 +11,13 @@ import {
   getOptionByName,
   updateOption,
   updateProductVariant,
-} from '../controllers/variantController.js';
+} from '../../controllers/product/variantController.js';
 import {
   validateCreateOption,
   validateCreateVariant,
   validateUpdateOption,
   validateUpdateVariant,
-} from '../middlewares/variantValidation.js';
+} from '../../middlewares/product/variantValidation.js';
 const router = Router();
 
 router.post(

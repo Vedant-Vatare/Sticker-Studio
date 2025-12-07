@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import prisma from '../db/db.js';
-import { productRecommendationSchema } from 'shared/schemas/productSchema.js';
-import { uploadOnCloudinary } from '../utils/cloudinary.js';
+import prisma from '../../db/db.js';
+import { productRecommendationSchema } from 'shared/schemas/product/productSchema.js';
+import { uploadOnCloudinary } from '../../utils/cloudinary.js';
 
 export async function createProduct(req, res) {
   if (!req.files || req.files.length === 0) {
