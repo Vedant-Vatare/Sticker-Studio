@@ -67,22 +67,29 @@ model UserAddress {
 }
 
 model Product {
-  id              String            @id @default(uuid())
-  name            String
-  description     String?
-  basePrice       Float?
-  price           Float?
-  images          String[]
-  stock           Int?              @default(0)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  UserCart        UserCart[]
-  OrderItem       OrderItem[]
-  Wishlist        Wishlist[]
-  ProductCategory ProductCategory[]
-  productVariants ProductVariant[]
+  id                    String                   @id @default(uuid())
+  name                  String
+  description           String?
+  basePrice             Float?
+  price                 Float?
+  images                String[]
+  defaultVariantId      String?                  @unique
+  stock                 Int?                     @default(0)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  UserCart              UserCart[]
+  OrderItem             OrderItem[]
+  Wishlist              Wishlist[]
+  ProductCategory       ProductCategory[]
+  productVariants       ProductVariant[]         @relation("ProductVariants")
+  defaultVariant        ProductVariant?          @relation("DefaultVariant", fields: [defaultVariantId], references: [id])
+  productTags           ProductTag[]
+  productSpecifications ProductSpecification[]
+  productDimension      ProductDimension?
+  searchVector          Unsupported("tsvector")? @default(dbgenerated("to_tsvector('english'::regconfig, ((name || ' '::text) || COALESCE(description, ''::text)))"))
 
   @@index([name, description])
+  @@index([searchVector])
 }
 
 model ProductVariant {
@@ -96,7 +103,8 @@ model ProductVariant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product           Product  @relation("ProductVariants", fields: [productId], references: [id], onDelete: Cascade)
+  defaultForProduct Product? @relation("DefaultVariant")
 
   @@index([productId])
   @@index([sku])
@@ -121,6 +129,59 @@ model Category {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   ProductCategory    ProductCategory[]
+}
+
+model Tag {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  slug        String       @unique
+  description String?
+  color       String?
+  icon        String?
+  priority    Int          @default(0)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  productTags ProductTag[]
+
+  @@index([slug])
+}
+
+model ProductTag {
+  id        String   @id @default(uuid())
+  productId String
+  tagId     String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([productId, tagId])
+  @@index([productId])
+  @@index([tagId])
+}
+
+model ProductSpecification {
+  id        String   @id @default(uuid())
+  productId String   @unique
+  data      Json
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model ProductDimension {
+  id        String   @id @default(uuid())
+  productId String   @unique
+  length    Float?
+  width     Float?
+  height    Float?
+  weight    Float? //in gms
+  unit      String   @default("cm")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ProductCategory {
