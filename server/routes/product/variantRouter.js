@@ -26,7 +26,7 @@ router.post(
   createProductVariant,
 );
 router.get('/:productId', asyncHandler(getAllVariants));
-router.put(
+router.patch(
   '/:id',
   [authenticateAdmin, validateUpdateVariant],
   asyncHandler(updateProductVariant),
@@ -40,7 +40,7 @@ router.post(
 );
 router.get('/option/all', authenticateAdmin, asyncHandler(getAllOptions));
 router.get('/option/:name', authenticateAdmin, asyncHandler(getOptionByName));
-router.put(
+router.patch(
   '/option/:id',
   [authenticateAdmin, validateUpdateOption],
   asyncHandler(updateOption),
