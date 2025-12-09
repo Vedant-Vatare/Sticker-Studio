@@ -6,6 +6,7 @@ import orderRouter from './orderRouter.js';
 import CategoryRouter from './categoryRouter.js';
 import variantRouter from './product/variantRouter.js';
 import productSpecsRouter from './product/specificationRouter.js';
+import productDimensionsRouter from './product/dimensionsRouter.js';
 
 const router = Router();
 router.use('/user', userRouter);
@@ -15,5 +16,6 @@ router.use('/cart', cartRouter);
 router.use('/order', orderRouter);
 router.use('/variant', variantRouter);
 router.use('/product/specs', productSpecsRouter);
+router.use('/product/dimensions', productDimensionsRouter);
 
 export default router;
