@@ -1,7 +1,9 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import {
   getProductDetails,
+  getProductDimensions,
   getProductRecommendations,
+  getProductSpecifications,
   getProductvariant,
   searchProductsByQuery,
 } from '@/services/product/product';
@@ -46,6 +48,22 @@ export const useProductVariant = (id) => {
   return useQuery({
     queryKey: ['product-variant', { id }],
     queryFn: () => getProductvariant(id),
+    staleTime: Infinity,
+  });
+};
+
+export const useProductSpecs = (productId) => {
+  return useQuery({
+    queryKey: ['product-specs', productId],
+    queryFn: () => getProductSpecifications(productId),
+    staleTime: Infinity,
+  });
+};
+
+export const useProductDimensions = (productId) => {
+  return useQuery({
+    queryKey: ['product-dimensions', productId],
+    queryFn: () => getProductDimensions(productId),
     staleTime: Infinity,
   });
 };

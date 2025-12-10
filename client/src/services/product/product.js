@@ -29,10 +29,31 @@ export async function getProductDetails(id) {
   const response = await axios.get(`/product/${id}`);
   return response.data.product;
 }
+
 export async function getProductvariant(id) {
   const response = await axios.get(`/variant/${id}`);
   return {
     variants: response.data.productVariants,
     options: response.data.options,
   };
+}
+
+export async function getProductSpecifications(productId) {
+  const response = await axios.get(`/product-specs`, {
+    params: {
+      productId,
+    },
+  });
+
+  return response.data?.specifications ?? null;
+}
+
+export async function getProductDimensions(productId) {
+  const response = await axios.get(`/product-dimensions`, {
+    params: {
+      productId,
+    },
+  });
+
+  return response.data?.productDimensions;
 }
