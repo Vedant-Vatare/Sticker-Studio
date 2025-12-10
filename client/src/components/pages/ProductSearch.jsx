@@ -1,15 +1,17 @@
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useSearchProducts } from '@/hooks/product';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import ProductGrid from '../product/ProductGrid';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-
 import { SearchX } from 'lucide-react';
+import { breadcrumbStore } from '@/store/globalStore';
 
 const ProductSearch = () => {
   const navigate = useNavigate();
+  const setBreadcrumbs = breadcrumbStore((store) => store.setBreadcrumbs);
   const { query } = useParams();
   const {
     data: searchedProducts,
@@ -20,6 +22,18 @@ const ProductSearch = () => {
     isError,
     error,
   } = useSearchProducts({ query, limit: 20 });
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: 'home', path: '/' },
+      {
+        label: query,
+        path: `/search/${query}`,
+      },
+    ]);
+
+    return () => setBreadcrumbs([]);
+  }, [query]);
 
   if (isLoading) {
     return (
@@ -51,7 +65,7 @@ const ProductSearch = () => {
     navigate(`/product/${id}`, { target: 'blank' });
   };
   const products = searchedProducts?.pages.flatMap((batch) => batch);
-  if (products.length > 0) {
+  if (products?.length > 0) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <motion.div>
@@ -74,7 +88,7 @@ const ProductSearch = () => {
       </div>
     );
   }
-  if (products.length === 0) {
+  if (products?.length === 0) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="bg-muted/40 mt-10 flex flex-col items-center rounded-md p-10 text-center">

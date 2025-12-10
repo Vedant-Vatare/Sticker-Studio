@@ -1,20 +1,10 @@
-import logoIcon from '@/assets/logo-icon.png';
-import logo from '@/assets/logo-dark.png';
-import {
-  Mail,
-  MapPin,
-  Phone,
-  Facebook,
-  Instagram,
-  Linkedin,
-} from 'lucide-react';
+import { Mail, MapPin, Phone } from 'lucide-react';
 import { breadcrumbStore } from '@/store/globalStore';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Fragment } from 'react';
@@ -24,7 +14,7 @@ const Footer = () => {
   const breadcrumbLen = breadcrumbs.length;
 
   return (
-    <footer className="bg-foreground text-background shadow-inner">
+    <footer className="text-foreground bg-section-background shadow-inner">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
@@ -32,14 +22,14 @@ const Footer = () => {
               <Fragment key={index}>
                 <BreadcrumbItem>
                   <BreadcrumbLink
-                    className="text-sm text-white hover:text-white hover:underline"
+                    className="text-accent-foreground text-sm font-medium underline"
                     href={crumb.path}
                   >
                     {crumb.label}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 {index < breadcrumbLen - 1 && (
-                  <BreadcrumbSeparator className="text-white" />
+                  <BreadcrumbSeparator className="" />
                 )}
               </Fragment>
             ))}
@@ -47,55 +37,30 @@ const Footer = () => {
         </Breadcrumb>
 
         <div className="xl:grid-col-5 grid grid-cols-1 gap-6 sm:grid-cols-2 md:mr-8 lg:grid-cols-5">
-          <div className="lg:col-span-1">
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="Sticker Studio Logo" className="h-16" />
-            </div>
-            <div className="mt-6 flex gap-4">
-              <a
-                href="#"
-                aria-label="Follow us on Facebook"
-                className="transition hover:opacity-70"
-              >
-                <Facebook size={20} />
-              </a>
-              <a
-                href="#"
-                aria-label="Follow us on Instagram"
-                className="transition hover:opacity-70"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="#"
-                aria-label="Follow us on LinkedIn"
-                className="transition hover:opacity-70"
-              >
-                <Linkedin size={20} />
-              </a>
-            </div>
-          </div>
-
           <div>
             <h4 className="font-semibold">Quick Links</h4>
             <ul className="mt-4 space-y-3 text-sm">
               <li className="text-xs">
-                <a href="#" className="opacity-80 transition hover:opacity-100">
-                  Account
-                </a>
-              </li>
-              <li className="text-xs">
-                <a href="#" className="opacity-80 transition hover:opacity-100">
+                <a
+                  href="/profile"
+                  className="opacity-80 transition hover:opacity-100"
+                >
                   Profile
                 </a>
               </li>
               <li className="text-xs">
-                <a href="#" className="opacity-80 transition hover:opacity-100">
+                <a
+                  href="/orders"
+                  className="opacity-80 transition hover:opacity-100"
+                >
                   Orders
                 </a>
               </li>
               <li className="text-xs">
-                <a href="#" className="opacity-80 transition hover:opacity-100">
+                <a
+                  href="/wishlist"
+                  className="opacity-80 transition hover:opacity-100"
+                >
                   Wishlist
                 </a>
               </li>
@@ -157,7 +122,7 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold">Contact Info</h4>
             <ul className="mt-4 space-y-3 text-sm">
-              <li className="text-sx fletext-xs">
+              <li className="flex gap-3 text-xs">
                 <Phone size={16} className="mt-0.5 shrink-0" />
                 <a
                   href="tel:+1234567890"
@@ -182,7 +147,7 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        <div className="border-background/10 mt-8 border-t pt-8 text-center text-xs opacity-60">
+        <div className="mt-8 border-t pt-8 text-center text-xs opacity-60">
           <p>
             &copy; {new Date().getFullYear()} Sticker Studio. All rights
             reserved.

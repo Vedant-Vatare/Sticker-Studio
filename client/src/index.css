@@ -10,6 +10,7 @@
 
 :root {
   --background: oklch(1 0 0);
+  --section-background: oklch(98.268% 0.00275 285.746);
   --foreground: oklch(23.929% 0.00003 271.152);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.1363 0.0364 259.201);
@@ -138,6 +139,7 @@
   --color-warning: hsl(40 95% 90%);
   --color-warning-foreground: hsl(32 75% 25%);
 
+  --color-section-background: var(--section-background);
   --color-neutral: hsl(250 20% 94%);
   --color-neutral-foreground: hsl(250 20% 35%);
   --color-background: var(--background);

@@ -11,7 +11,7 @@ import {
 } from '@/hooks/cart';
 import ServerError from './ServerError';
 import { breadcrumbStore } from '@/store/globalStore';
-import { useProductRecommendations } from '@/hooks/product';
+
 import ProductGrid from '../product/ProductGrid';
 import CartFAQ from '../ui/FAQ/CartFAQ';
 
@@ -22,18 +22,6 @@ const Cart = () => {
     0,
   );
   const setBreadcrumbs = breadcrumbStore((state) => state.setBreadcrumbs);
-
-  const { data: similarProductsData, isLoading: isLoadingSimilar } =
-    useProductRecommendations({
-      productIds: cartItems?.map((item) => item.product.id) || [],
-      categorySlugs:
-        cartItems?.map((item) => item.product.category?.slug) || [],
-      limit: 6,
-    });
-
-  const similarProducts = similarProductsData?.map(
-    (productData) => productData.product,
-  );
 
   useEffect(() => {
     setBreadcrumbs([
@@ -87,27 +75,6 @@ const Cart = () => {
                   ))}
                 </div>
               </div>
-              {similarProducts?.length > 0 && (
-                <div className="mt-10">
-                  <h2 className="mb-2 text-center text-xl lg:mb-4">
-                    You might also like
-                  </h2>
-                  <div className="flex w-full justify-center">
-                    <div className="flex w-full max-w-5xl flex-col gap-2">
-                      {isLoadingSimilar ? (
-                        <CartSkeleton />
-                      ) : (
-                        <>
-                          <ProductGrid
-                            products={similarProducts}
-                            showAddToCartBtn={true}
-                          />
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
               <CartFAQ />
             </>
           )}
