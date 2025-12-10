@@ -15,7 +15,7 @@ router.use('/category', CategoryRouter);
 router.use('/cart', cartRouter);
 router.use('/order', orderRouter);
 router.use('/variant', variantRouter);
-router.use('/product/specs', productSpecsRouter);
-router.use('/product/dimensions', productDimensionsRouter);
+router.use('/product-specs', productSpecsRouter);
+router.use('/product-dimensions', productDimensionsRouter);
 
 export default router;

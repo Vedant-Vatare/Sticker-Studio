@@ -10,10 +10,12 @@ import {
 
 const router = Router();
 
-router.get('/:productId', asyncHandler(getProductSpecification));
+router.get('/', asyncHandler(getProductSpecification));
+
 router.use(authenticateAdmin);
-router.post('/:productId', asyncHandler(createProductSpecification));
-router.patch('/:productId', asyncHandler(updateProductSpecification));
-router.delete('/:productId', asyncHandler(removeProductSpecification));
+
+router.post('/', asyncHandler(createProductSpecification));
+router.patch('/', asyncHandler(updateProductSpecification));
+router.delete('/', asyncHandler(removeProductSpecification));
 
 export default router;

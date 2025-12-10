@@ -9,12 +9,12 @@ import {
 import asyncHandler from '../../utils/asyncHandler.js';
 const router = Router();
 
-router.get('/:productId', asyncHandler(getProductDimensions));
+router.get('/', asyncHandler(getProductDimensions));
 
 router.use(authenticateAdmin);
 
-router.post('/:productId', asyncHandler(createProductDimensions));
-router.patch('/:productId', asyncHandler(updateProductDimensions));
-router.delete('/:productId', asyncHandler(removeProductDimensions));
+router.post('/', asyncHandler(createProductDimensions));
+router.patch('/', asyncHandler(updateProductDimensions));
+router.delete('/', asyncHandler(removeProductDimensions));
 
 export default router;

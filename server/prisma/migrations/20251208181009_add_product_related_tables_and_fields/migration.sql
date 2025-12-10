@@ -5,10 +5,11 @@
 
 */
 -- DropIndex
-DROP INDEX "Product_search_vector_idx";
+DROP INDEX IF EXISTS "Product_search_vector_idx";
+DROP INDEX IF EXISTS "Product_searchVector_idx";
 
 -- DropIndex
-DROP INDEX "ProductCategory_category_search_idx";
+DROP INDEX IF EXISTS "ProductCategory_category_search_idx";
 
 -- AlterTable
 ALTER TABLE "Product" ADD COLUMN     "defaultVariantId" TEXT;

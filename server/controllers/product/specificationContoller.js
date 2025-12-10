@@ -4,19 +4,34 @@ import {
   specificationSchema,
   updateSpecificationSchema,
 } from 'shared/schemas/product/specificationSchema.js';
+import { checkVariantExists } from '../../utils/product.js';
 
 export async function createProductSpecification(req, res) {
   try {
-    const { productId } = req.params;
+    let { productId, variantId } = req.query;
+    if (!variantId) variantId = null;
+
     const { data, success, error } = specificationSchema.safeParse({
       data: req.body.data,
-      productId: productId,
+      productId,
+      variantId,
     });
+
     if (!success)
       return res.status(400).json({
         message: 'invalid specification data',
         error: z.treeifyError(error),
       });
+
+    if (variantId) {
+      const doesVariantExist = await checkVariantExists(productId, variantId);
+
+      if (!doesVariantExist) {
+        return res.status(400).json({
+          error: 'product id does not have given variant id',
+        });
+      }
+    }
 
     const specification = await prisma.productSpecification.create({
       data: data,
@@ -31,11 +46,15 @@ export async function createProductSpecification(req, res) {
         .status(201)
         .json({ error: 'specification for the product already exists' });
     }
+    console.log(e);
+
+    return res.status(500).json({ e });
   }
 }
 
 export async function getProductSpecification(req, res) {
-  const { productId } = req.params;
+  let { productId, variantId } = req.query;
+  if (!variantId) variantId = null;
 
   if (!productId) {
     return res.status(400).json({
@@ -43,24 +62,37 @@ export async function getProductSpecification(req, res) {
     });
   }
 
-  const specification = await prisma.productSpecification.findUnique({
+  if (variantId) {
+    const doesVariantExist = await checkVariantExists(productId, variantId);
+
+    if (!doesVariantExist) {
+      return res.status(400).json({
+        error: 'product id does not have given variant id',
+      });
+    }
+  }
+
+  const specifications = await prisma.productSpecification.findMany({
     where: { productId },
   });
 
   return res
     .status(200)
-    .json({ message: 'product specification fetched', specification });
+    .json({ message: 'product specification fetched', specifications });
 }
 
 export async function updateProductSpecification(req, res) {
-  const { productId } = req.params;
+  let { productId, variantId } = req.query;
+  if (!variantId) variantId = null;
+
   const {
     data: parsed,
     success,
     error,
   } = updateSpecificationSchema.safeParse({
     data: req.body.data,
-    productId: productId,
+    productId,
+    variantId,
   });
 
   if (!success) {
@@ -69,18 +101,29 @@ export async function updateProductSpecification(req, res) {
       error: z.treeifyError(error),
     });
   }
+  if (variantId) {
+    const doesVariantExist = await checkVariantExists(productId, variantId);
 
-  const oldSpecs = await prisma.productSpecification.findUnique({
-    where: { productId },
+    if (!doesVariantExist) {
+      return res.status(400).json({
+        error: 'product id does not have given variant id',
+      });
+    }
+  }
+
+  const oldSpecs = await prisma.productSpecification.findFirst({
+    where: { productId, variantId },
     select: {
       data: true,
     },
   });
+
   if (!oldSpecs) {
     return res
       .status(400)
-      .json({ error: 'product with given id does not exists' });
+      .json({ error: 'product with given ids does not exists' });
   }
+
   const updatedSpecsData = {
     ...oldSpecs.data,
     ...parsed.data.updateFields,
@@ -91,8 +134,8 @@ export async function updateProductSpecification(req, res) {
     delete updatedSpecsData[field];
   });
 
-  const newSpecs = await prisma.productSpecification.update({
-    where: { productId },
+  await prisma.productSpecification.updateMany({
+    where: { productId, variantId },
     data: {
       data: updatedSpecsData,
     },
@@ -100,13 +143,14 @@ export async function updateProductSpecification(req, res) {
 
   return res.status(200).json({
     message: 'product specifications updated',
-    specification: newSpecs,
+    updatedSpecifications: updatedSpecsData,
   });
 }
 
 export async function removeProductSpecification(req, res) {
   try {
-    const { productId } = req.params;
+    let { productId, variantId } = req.query;
+    if (!variantId) variantId = null;
 
     if (!productId) {
       return res.status(400).json({
@@ -114,8 +158,18 @@ export async function removeProductSpecification(req, res) {
       });
     }
 
-    await prisma.productSpecification.delete({
-      where: { productId },
+    if (variantId) {
+      const doesVariantExist = await checkVariantExists(productId, variantId);
+
+      if (!doesVariantExist) {
+        return res.status(400).json({
+          error: 'product id does not have given variant id',
+        });
+      }
+    }
+
+    await prisma.productSpecification.deleteMany({
+      where: { productId, variantId },
     });
 
     return res.status(200).json({ message: 'product specification deleted' });
@@ -125,5 +179,7 @@ export async function removeProductSpecification(req, res) {
         .status(400)
         .json({ message: 'product specifications does not exists' });
     }
+    console.log(error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

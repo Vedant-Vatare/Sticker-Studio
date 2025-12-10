@@ -85,7 +85,7 @@ model Product {
   defaultVariant        ProductVariant?          @relation("DefaultVariant", fields: [defaultVariantId], references: [id])
   productTags           ProductTag[]
   productSpecifications ProductSpecification[]
-  productDimension      ProductDimension?
+  productDimensions     ProductDimension[]
   searchVector          Unsupported("tsvector")? @default(dbgenerated("to_tsvector('english'::regconfig, ((name || ' '::text) || COALESCE(description, ''::text)))"))
 
   @@index([name, description])
@@ -103,8 +103,10 @@ model ProductVariant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  product           Product  @relation("ProductVariants", fields: [productId], references: [id], onDelete: Cascade)
-  defaultForProduct Product? @relation("DefaultVariant")
+  product               Product                @relation("ProductVariants", fields: [productId], references: [id], onDelete: Cascade)
+  defaultForProduct     Product?               @relation("DefaultVariant")
+  variantSpecifications ProductSpecification[]
+  variantDimensions     ProductDimension[]
 
   @@index([productId])
   @@index([sku])
@@ -161,27 +163,36 @@ model ProductTag {
 }
 
 model ProductSpecification {
-  id        String   @id @default(uuid())
-  productId String   @unique
+  id        String          @id @default(uuid())
+  productId String
+  variantId String?
   data      Json
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
   @@index([productId])
+  @@index([variantId])
 }
 
 model ProductDimension {
-  id        String   @id @default(uuid())
-  productId String   @unique
+  id        String          @id @default(uuid())
+  productId String
+  variantId String?
   length    Float?
   width     Float?
   height    Float?
-  weight    Float? //in gms
-  unit      String   @default("cm")
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  weight    Float? // in gms
+  thickness Float?
+  unit      String          @default("cm")
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([productId])
+  @@index([variantId])
 }
 
 model ProductCategory {
