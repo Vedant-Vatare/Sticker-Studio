@@ -81,6 +81,88 @@ const ProductPageSkeleton = () => {
   );
 };
 
+const ProductImages = ({ product, variant }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isWishlisted, setIsWishlisted] = useState(true);
+
+  const selectedProduct =
+    variant && variant.images.length > 0 ? variant : product;
+  const productImages = selectedProduct.images;
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % productImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + productImages.length) % productImages.length,
+    );
+  };
+
+  return (
+    <div className="relative flex flex-col gap-4">
+      <div className="bg-muted/45 relative flex aspect-square cursor-grabbing items-center justify-center overflow-hidden rounded-none select-none">
+        <img
+          src={productImages[currentImageIndex]}
+          alt={`Product image ${currentImageIndex + 1}`}
+          className="h-full w-full max-w-xs object-contain md:max-w-full"
+        />
+        {productImages.length > 1 && (
+          <>
+            <Button
+              size={'icon'}
+              variant={'ghost'}
+              onClick={prevImage}
+              className="text-foreground/60 absolute top-1/2 left-1 z-10 -translate-y-1/2 rounded-full p-0 px-1 py-1 transition"
+            >
+              <ChevronLeft className="size-6" />
+            </Button>
+            <Button
+              size={'icon'}
+              variant={'ghost'}
+              onClick={nextImage}
+              className="text-foreground/60 absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-full p-2 transition"
+            >
+              <ChevronRight className="size-6" />
+            </Button>
+          </>
+        )}
+      </div>
+      <div>
+        <Button
+          size={'icon'}
+          variant={'outline'}
+          onClick={() => setIsWishlisted(!isWishlisted)}
+          className={`absolute top-1 right-1 h-9 w-9 cursor-pointer transition sm:top-3 sm:right-3 ${
+            isWishlisted
+              ? 'bg-destructive/10 hover:bg-destructive/10 text-destructive hover:text-destructive'
+              : 'border-border text-foreground'
+          }`}
+        >
+          <Heart className={`h-7 w-7 ${isWishlisted && 'fill-current'}`} />
+        </Button>
+      </div>
+      <div className="flex gap-3">
+        {productImages.map((image, index) => (
+          <div
+            key={index}
+            onClick={() => setCurrentImageIndex(index)}
+            className={`h-24 w-24 scale-95 cursor-pointer overflow-hidden rounded-lg border-2 brightness-90 transition ${
+              index === currentImageIndex && ' scale-100 brightness-100'
+            }`}
+          >
+            <img
+              src={image}
+              alt={`View ${index + 1}`}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function ProductPage() {
   const { productId } = useParams();
   const { data: product, isLoading: productLoading } =
@@ -89,9 +171,7 @@ export default function ProductPage() {
     useProductVariant(productId);
   const { data: cartItems } = useCartQuery();
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(true);
-  const [selectedVariant, setSelectedVariant] = useState({});
+  const [selectedOptions, setSelectedOptions] = useState({});
 
   const groupedOptions = useMemo(() => {
     if (!variantDetails?.options || variantDetails.options.length === 0)
@@ -138,47 +218,38 @@ export default function ProductPage() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [variantDetails]);
 
+  // populating initial group of options with empty strings
   useEffect(() => {
     if (groupedOptions.length > 0) {
       const initialVariant = {};
       groupedOptions.forEach((option) => (initialVariant[option.name] = ''));
-      setSelectedVariant(initialVariant);
+      setSelectedOptions(initialVariant);
     }
   }, [groupedOptions]);
 
-  const selectedVariantDetails = useMemo(() => {
-    const variantIds = Object.values(selectedVariant);
+  const selectedvariant = useMemo(() => {
+    const optionIds = Object.values(selectedOptions);
 
-    if (!variantDetails || variantIds.some((id) => id === '')) {
+    if (!variantDetails || optionIds.some((id) => id === '')) {
       return null;
     }
 
-    const variantFound = variantDetails.variants?.find((variantDetail) => {
-      return variantDetail.variant.every((v) => variantIds.includes(v));
+    const variantFound = variantDetails.variants?.find((variant) => {
+      return variant.variant.every((v) => optionIds.includes(v));
     });
 
     return variantFound || null;
-  }, [variantDetails, selectedVariant]);
+  }, [variantDetails, selectedOptions]);
 
-  const isVariantAvailable = selectedVariantDetails !== null;
+  const isVariantAvailable = selectedvariant !== null;
 
   const handleVariantChange = useCallback((newVariant) => {
-    setSelectedVariant(newVariant);
+    setSelectedOptions(newVariant);
   }, []);
 
   if (productLoading || variantLoading) {
     return <ProductPageSkeleton />;
   }
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex(
-      (prev) => (prev - 1 + product.images.length) % product.images.length,
-    );
-  };
 
   const discount = Math.round(
     ((product.basePrice - product.price) / product.basePrice) * 100,
@@ -188,69 +259,7 @@ export default function ProductPage() {
     <div className="bg-background min-h-screen">
       <main className="241005 mx-auto max-w-7xl px-2 py-2 sm:px-6 sm:py-12 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
-          <div className="relative flex flex-col gap-4">
-            <div className="bg-muted/45 relative flex aspect-square cursor-grabbing items-center justify-center overflow-hidden rounded-none select-none">
-              <img
-                src={product.images[currentImageIndex]}
-                alt={product.name}
-                className="h-full w-full max-w-xs object-contain md:max-w-full"
-              />
-              {product.images.length > 1 && (
-                <>
-                  <Button
-                    size={'icon'}
-                    variant={'ghost'}
-                    onClick={prevImage}
-                    className="text-foreground/60 absolute top-1/2 left-1 z-10 -translate-y-1/2 rounded-full p-0 px-1 py-1 transition"
-                  >
-                    <ChevronLeft className="size-6" />
-                  </Button>
-                  <Button
-                    size={'icon'}
-                    variant={'ghost'}
-                    onClick={nextImage}
-                    className="text-foreground/60 absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-full p-2 transition"
-                  >
-                    <ChevronRight className="size-6" />
-                  </Button>
-                </>
-              )}
-            </div>
-            <div>
-              <Button
-                size={'icon'}
-                variant={'outline'}
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className={`absolute top-1 right-1 h-9 w-9 cursor-pointer transition sm:top-3 sm:right-3 ${
-                  isWishlisted
-                    ? 'bg-destructive/10 hover:bg-destructive/10 text-destructive hover:text-destructive'
-                    : 'border-border text-foreground'
-                }`}
-              >
-                <Heart
-                  className={`h-7 w-7 ${isWishlisted && 'fill-current'}`}
-                />
-              </Button>
-            </div>
-            <div className="flex gap-3">
-              {product.images.map((image, index) => (
-                <div
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`h-24 w-24 scale-95 cursor-pointer overflow-hidden rounded-lg border-2 brightness-90 transition ${
-                    index === currentImageIndex && ' scale-100 brightness-100'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`View ${index + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
+          <ProductImages product={product} variant={selectedvariant} />
           <div className="relative flex flex-col gap-3">
             <div>
               {discount > 10 && (
@@ -280,13 +289,14 @@ export default function ProductPage() {
               </div>
             </div>
             <Separator />
+
             {groupedOptions.map((option) => (
               <ProductOptions
                 key={option.name}
                 name={option.name}
                 values={option.values}
-                selectedVariant={selectedVariant}
-                setSelectedVariant={handleVariantChange}
+                selectedOptions={selectedOptions}
+                setSelectedOptions={handleVariantChange}
               />
             ))}
 
@@ -298,7 +308,7 @@ export default function ProductPage() {
             {variantDetails.options.length > 0 && (
               <div className="relative ml-2 flex items-center">
                 <span className="text-destructive tracking-wide">
-                  {Object.values(selectedVariant).every((id) => id !== '') &&
+                  {Object.values(selectedOptions).every((id) => id !== '') &&
                     !isVariantAvailable && (
                       <span className="absolute -top-2 text-sm font-medium">
                         Selected variant is not available
@@ -356,7 +366,7 @@ export default function ProductPage() {
         </div>
         <ProductInfo
           productId={productId}
-          variantId={selectedVariantDetails?.id ?? null}
+          variantId={selectedvariant?.id ?? null}
         />
       </main>
       <ProductRecommendations productIds={[productId]} />

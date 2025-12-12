@@ -1,8 +1,6 @@
 import { useProductDimensions, useProductSpecs } from '@/hooks/product';
 import { memo } from 'react';
 import { Skeleton } from '../ui/skeleton';
-import { useState } from 'react';
-import { useEffect } from 'react';
 
 const ProductInfo = memo(({ productId, variantId }) => {
   return (
@@ -54,8 +52,6 @@ const ProductSpecifications = ({ productId, variantId }) => {
   const baseSpec = specifications?.find((spec) => spec.variantId === null);
 
   const finalSpec = variantSpec?.data || baseSpec?.data || {};
-
-  console.log(finalSpec);
 
   if (Object.keys(finalSpec).length > 0) {
     return (
