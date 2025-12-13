@@ -12,10 +12,7 @@ export const productVariantSchema = z.object({
   variant: z.array(z.string()),
   sku: z.string().optional(),
   price: z.coerce.number().min(1, 'Price is required.'),
-  stock: z.coerce
-    .number()
-    .min(0, 'Stock must be a valid non-negative number')
-    .default(0),
+  stock: z.coerce.number().min(0, 'Stock must be a valid non-negative number'),
 });
 
 export const updateProductVariantSchema = productVariantSchema.partial();

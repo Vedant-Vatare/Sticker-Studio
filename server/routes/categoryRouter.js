@@ -7,21 +7,26 @@ import {
 } from '../middlewares/categoryValidation.js';
 import {
   createCategory,
+  createProductCategory,
   deleteCategory,
+  deleteProductCategory,
   getAllCategories,
+  getAllCategoriesForProduct,
   updateCategory,
 } from '../controllers/categoryController.js';
 
 const router = Router();
 
-router.post(
-  '/create',
-  authenticateAdmin,
-  validateCreateCategory,
-  asyncHandler(createCategory),
-);
 router.get('/all', asyncHandler(getAllCategories));
+router.get('/product/:id', asyncHandler(getAllCategoriesForProduct));
+
+router.use(authenticateAdmin);
+
+router.post('/create', validateCreateCategory, asyncHandler(createCategory));
 router.patch('/:id', validateUpdateCategory, asyncHandler(updateCategory));
-router.delete('/:id', authenticateAdmin, asyncHandler(deleteCategory));
+router.delete('/:id', asyncHandler(deleteCategory));
+
+router.post('/product/create', asyncHandler(createProductCategory));
+router.delete('/product/:id', asyncHandler(deleteProductCategory));
 
 export default router;

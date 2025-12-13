@@ -31,6 +31,7 @@ export async function getProductById(req, res) {
       where: { id },
       include: {
         productVariants: true,
+        ProductCategory: true,
       },
     });
     if (!product) {

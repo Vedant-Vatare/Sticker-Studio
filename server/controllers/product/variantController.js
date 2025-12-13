@@ -1,4 +1,5 @@
 import prisma from '../../db/db.js';
+import { uploadOnCloudinary } from '../../utils/cloudinary.js';
 
 const generateSKU = (productId, options) => {
   const sorted = options.sort((a, b) => a.name.localeCompare(b.name));
@@ -10,6 +11,7 @@ const generateSKU = (productId, options) => {
 
 export async function createProductVariant(req, res) {
   const optionIds = req.productVariantData.variant;
+
   const options = await prisma.option.findMany({
     where: {
       id: {
@@ -26,14 +28,23 @@ export async function createProductVariant(req, res) {
       .status(400)
       .json({ error: 'variant contains invalid ids', invalidIds });
   }
-  const SKU = generateSKU(req.productVariantData.productId, options);
+
+  req.productVariantData.sku = generateSKU(
+    req.productVariantData.productId,
+    options,
+  );
+
+  if (req.files && req.files.length > 0) {
+    const imageURLs = await uploadOnCloudinary(req.files);
+    req.productVariantData.images = imageURLs;
+  }
 
   const productVariant = await prisma.productVariant.create({
     data: {
       ...req.productVariantData,
-      sku: SKU,
     },
   });
+
   return res
     .status(201)
     .json({ message: 'productVariant added successfully', productVariant });
@@ -55,6 +66,7 @@ export async function getAllVariants(req, res) {
       },
     },
   });
+
   return res.status(200).json({
     message: 'variants fetched successfully',
     productVariants,
@@ -64,6 +76,12 @@ export async function getAllVariants(req, res) {
 
 export async function updateProductVariant(req, res) {
   const { id } = req.params;
+
+  if (req?.files?.length > 0) {
+    const imageURLs = await uploadOnCloudinary(req.files);
+    req.updateData.images = imageURLs;
+  }
+
   const productVariant = await prisma.productVariant.update({
     where: { id },
     data: req.updateData,
@@ -83,9 +101,12 @@ export async function deleteProductVariant(req, res) {
       .status(200)
       .json({ message: 'product variant was deleted successfully' });
   } catch (e) {
-    if ((e.code = 'P2025')) {
+    if (e.code === 'P2025') {
       return res.status(400).json({ error: 'product variant not found' });
     }
+
+    console.log(e);
+    return res.status(500).json({ error: 'internal server error' });
   }
 }
 
@@ -99,19 +120,16 @@ export async function createOption(req, res) {
       success: true,
       data: option,
     });
-  } catch (error) {
-    if (error.code === 'P2002') {
+  } catch (e) {
+    if (e.code === 'P2002') {
       return res.status(409).json({
         success: false,
         error: 'Option with this name and value already exists',
       });
     }
 
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to create option',
-      error: error.message,
-    });
+    console.log(e);
+    return res.status(500).json({ error: 'internal server error' });
   }
 }
 
@@ -150,7 +168,7 @@ export async function updateOption(req, res) {
 
   return res
     .status(200)
-    .json({ message: 'varaint option was updated', option });
+    .json({ message: 'variant option was updated', option });
 }
 
 export async function deleteOption(req, res) {
@@ -165,6 +183,11 @@ export async function deleteOption(req, res) {
 
     return res.status(200).json({ message: 'variant option was deleted' });
   } catch (e) {
-    return res.status(400).json({ error: 'variant not found' });
+    if (e.code === 'P2025') {
+      return res.status(400).json({ error: 'variant not found' });
+    }
+
+    console.log(e);
+    return res.status(500).json({ error: 'internal server error' });
   }
 }

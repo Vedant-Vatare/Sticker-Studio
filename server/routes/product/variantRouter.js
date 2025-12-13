@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticateAdmin } from '../../middlewares/authUser.js';
+import upload from '../../utils/multerConfig.js';
 import asyncHandler from '../../utils/asyncHandler.js';
 import {
   createOption,
@@ -20,31 +21,26 @@ import {
 } from '../../middlewares/product/variantValidation.js';
 const router = Router();
 
-router.post(
-  '/add',
-  [authenticateAdmin, validateCreateVariant],
-  createProductVariant,
-);
 router.get('/:productId', asyncHandler(getAllVariants));
-router.patch(
-  '/:id',
-  [authenticateAdmin, validateUpdateVariant],
-  asyncHandler(updateProductVariant),
-);
-router.delete('/:id', authenticateAdmin, asyncHandler(deleteProductVariant));
+
+router.use(authenticateAdmin);
 
 router.post(
-  '/option',
-  [authenticateAdmin, validateCreateOption],
-  asyncHandler(createOption),
+  '/add',
+  [upload.array('images'), validateCreateVariant],
+  asyncHandler(createProductVariant),
 );
-router.get('/option/all', authenticateAdmin, asyncHandler(getAllOptions));
-router.get('/option/:name', authenticateAdmin, asyncHandler(getOptionByName));
 router.patch(
-  '/option/:id',
-  [authenticateAdmin, validateUpdateOption],
-  asyncHandler(updateOption),
+  '/:id',
+  [upload.array('images'), validateUpdateVariant],
+  asyncHandler(updateProductVariant),
 );
-router.delete('/option/:id', authenticateAdmin, asyncHandler(deleteOption));
+router.delete('/:id', asyncHandler(deleteProductVariant));
+
+router.post('/option', [validateCreateOption], asyncHandler(createOption));
+router.get('/option/all', asyncHandler(getAllOptions));
+router.get('/option/:name', asyncHandler(getOptionByName));
+router.patch('/option/:id', [validateUpdateOption], asyncHandler(updateOption));
+router.delete('/option/:id', asyncHandler(deleteOption));
 
 export default router;

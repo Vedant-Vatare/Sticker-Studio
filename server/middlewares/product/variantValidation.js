@@ -87,10 +87,10 @@ export async function validateUpdateVariant(req, res, next) {
     success,
     data: productVariant,
     error,
-  } = updateProductVariantSchema.safeParse(req.body);
+  } = updateProductVariantSchema.safeParse(req.body || {});
   if (!success) {
     return res.status(400).json({
-      message: 'invalid option data',
+      message: 'invalid product variant data',
       error: z.treeifyError(error),
     });
   }
