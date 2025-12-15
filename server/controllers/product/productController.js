@@ -61,6 +61,7 @@ export async function getProductsBySearch(req, res) {
 SELECT
   p.id,
   p.name,
+  p.slug,
   p.description,
   p."basePrice",
   p.price,
@@ -148,6 +149,7 @@ export async function getProductRecommendation(req, res) {
             images: true,
             price: true,
             stock: true,
+            slug: true,
           },
         },
         category: {
@@ -178,6 +180,7 @@ export async function getProductRecommendation(req, res) {
             images: true,
             price: true,
             stock: true,
+            slug: true,
           },
         },
         category: {

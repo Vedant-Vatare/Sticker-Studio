@@ -25,8 +25,8 @@ export async function searchProductsByQuery({ query, limit, offset }) {
   return response.data.products;
 }
 
-export async function getProductDetails(id) {
-  const response = await axios.get(`/product/${id}`);
+export async function getProductDetails(identifier) {
+  const response = await axios.get(`/product/${identifier}`);
   return response.data.product;
 }
 

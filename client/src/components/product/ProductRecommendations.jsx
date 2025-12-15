@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useProductRecommendations } from '@/hooks/product';
 import ProductGrid from './ProductGrid';
 import { Skeleton } from '../ui/skeleton';
@@ -38,12 +38,6 @@ const SkeletonComponent = () => {
 
 const ProductRecommendations = memo(
   ({ productIds = [], categorySlug = [], heading }) => {
-    const navigate = useNavigate();
-
-    const handleProductClick = (id) => {
-      navigate(`/product/${id}`);
-    };
-
     const { data: similarProductsData, isLoading: isLoadingSimilar } =
       useProductRecommendations({
         productIds: productIds,
@@ -70,7 +64,6 @@ const ProductRecommendations = memo(
                   <ProductGrid
                     products={similarProducts}
                     showAddToCartBtn={true}
-                    onClick={handleProductClick}
                   />
                 </>
               )}

@@ -1,6 +1,7 @@
 import { Button } from '../ui/button';
-import { motion, stagger, animate, delay } from 'motion/react';
+import { motion, stagger } from 'motion/react';
 import { useAddToCartQuery, useCartQuery } from '@/hooks/cart';
+import { useNavigate } from 'react-router-dom';
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -23,9 +24,14 @@ const formatPrice = (amount) => {
   }).format(amount);
 };
 
-const ProductGrid = ({ products, showAddToCartBtn, onClick }) => {
+const ProductGrid = ({ products, showAddToCartBtn }) => {
   const { data: cartItems } = useCartQuery();
   const { mutateAsync: addToCartQuery } = useAddToCartQuery();
+  const navigate = useNavigate();
+
+  const handleProductClick = (identifier) => {
+    navigate(`/product/${identifier}`);
+  };
 
   return (
     <motion.div
@@ -38,7 +44,7 @@ const ProductGrid = ({ products, showAddToCartBtn, onClick }) => {
         {products.map((product, index) => (
           <motion.div
             key={index}
-            onClick={() => onClick(product.id)}
+            onClick={() => handleProductClick(product?.slug || product?.id)}
             className="outline-foreground flex h-full w-full cursor-pointer flex-col items-center justify-between rounded-sm p-2"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}

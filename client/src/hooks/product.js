@@ -36,19 +36,20 @@ export const useSearchProducts = ({ query, limit = 20 }) => {
   });
 };
 
-export const useProductDetails = (id) => {
+export const useProductDetails = (productId) => {
   return useQuery({
-    queryKey: ['product-details', { id }],
-    queryFn: () => getProductDetails(id),
+    queryKey: ['product-details', { productId }],
+    queryFn: () => getProductDetails(productId),
     staleTime: Infinity,
   });
 };
 
-export const useProductVariant = (id) => {
+export const useProductVariant = (productId) => {
   return useQuery({
-    queryKey: ['product-variant', { id }],
-    queryFn: () => getProductvariant(id),
+    queryKey: ['product-variant', { productId }],
+    queryFn: () => getProductvariant(productId),
     staleTime: Infinity,
+    enabled: !!productId,
   });
 };
 
@@ -57,6 +58,7 @@ export const useProductSpecs = (productId) => {
     queryKey: ['product-specs', productId],
     queryFn: () => getProductSpecifications(productId),
     staleTime: Infinity,
+    enabled: !!productId,
   });
 };
 
@@ -65,5 +67,6 @@ export const useProductDimensions = (productId) => {
     queryKey: ['product-dimensions', productId],
     queryFn: () => getProductDimensions(productId),
     staleTime: Infinity,
+    enabled: !!productId,
   });
 };

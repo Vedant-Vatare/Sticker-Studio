@@ -164,11 +164,11 @@ const ProductImages = ({ product, variant }) => {
 };
 
 export default function ProductPage() {
-  const { productId } = useParams();
+  const { identifier } = useParams();
   const { data: product, isLoading: productLoading } =
-    useProductDetails(productId);
+    useProductDetails(identifier);
   const { data: productVariantDetails, isLoading: variantLoading } =
-    useProductVariant(productId);
+    useProductVariant(product?.id);
   const { data: cartItems } = useCartQuery();
 
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -380,11 +380,11 @@ export default function ProductPage() {
           </div>
         </div>
         <ProductInfo
-          productId={productId}
+          productId={product?.id}
           variantId={selectedvariant?.id ?? null}
         />
       </main>
-      <ProductRecommendations productIds={[productId]} />
+      <ProductRecommendations productIds={[product?.id]} />
     </div>
   );
 }
