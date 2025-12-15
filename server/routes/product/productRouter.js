@@ -10,7 +10,7 @@ import {
   createProductCollection,
   deleteProduct,
   deleteProductCollection,
-  getProductById,
+  getProductDetails,
   getProductRecommendation,
   getProductsByCollection,
   getProductsBySearch,
@@ -32,7 +32,7 @@ router.post(
 router.get('/search', asyncHandler(getProductsBySearch));
 router.get('/collection', asyncHandler(getProductsByCollection));
 router.get('/recommendations', asyncHandler(getProductRecommendation));
-router.get('/:id', asyncHandler(getProductById));
+router.get('/:identifier', asyncHandler(getProductDetails));
 
 router.patch(
   '/:id',

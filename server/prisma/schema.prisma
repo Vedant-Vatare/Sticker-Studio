@@ -69,6 +69,7 @@ model UserAddress {
 model Product {
   id                    String                   @id @default(uuid())
   name                  String
+  slug                  String                   @unique @default(uuid())
   description           String?
   basePrice             Float?
   price                 Float?
@@ -88,6 +89,7 @@ model Product {
   productDimensions     ProductDimension[]
   searchVector          Unsupported("tsvector")? @default(dbgenerated("to_tsvector('english'::regconfig, ((name || ' '::text) || COALESCE(description, ''::text)))"))
 
+  @@index([slug])
   @@index([name, description])
   @@index([searchVector])
 }

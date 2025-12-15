@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   productCollectionSchema,
   productCreateSchema,
@@ -24,7 +25,7 @@ export async function validateUpdateProduct(req, res, next) {
   if (!zodResult.success) {
     return res.status(400).json({
       message: 'Invalid product data.',
-      error: zodResult.error.issues,
+      error: z.treeifyError(zodResult.error),
     });
   }
 

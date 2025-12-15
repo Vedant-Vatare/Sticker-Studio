@@ -6,7 +6,10 @@ const productSchema = z.object({
     .min(2, 'Name must be at least 2 characters.')
     .max(100, 'Name must be under 100 characters.')
     .transform((val) => val.trim()),
-
+  slug: z
+    .string()
+    .min(2)
+    .transform((val) => val.trim()),
   description: z
     .string()
     .max(1000, 'Description must be under 1000 characters.')

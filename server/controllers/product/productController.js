@@ -24,11 +24,14 @@ export async function createProduct(req, res) {
   }
 }
 
-export async function getProductById(req, res) {
-  const { id } = req.params;
+export async function getProductDetails(req, res) {
+  const { identifier } = req.params;
+
   try {
-    const product = await prisma.product.findUnique({
-      where: { id },
+    const product = await prisma.product.findFirst({
+      where: {
+        OR: [{ id: identifier }, { slug: identifier }],
+      },
       include: {
         productVariants: true,
         ProductCategory: true,
