@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProductRecommendations } from '@/hooks/product';
 import ProductGrid from './ProductGrid';
@@ -35,49 +36,52 @@ const SkeletonComponent = () => {
   );
 };
 
-const ProductRecommendations = ({ productIds, categorySlug, heading }) => {
-  const navigate = useNavigate();
+const ProductRecommendations = memo(
+  ({ productIds = [], categorySlug = [], heading }) => {
+    const navigate = useNavigate();
 
-  const handleProductClick = (id) => {
-    navigate(`/product/${id}`);
-  };
+    const handleProductClick = (id) => {
+      navigate(`/product/${id}`);
+    };
 
-  const { data: similarProductsData, isLoading: isLoadingSimilar } =
-    useProductRecommendations({
-      productIds: productIds || [],
-      categorySlugs: categorySlug || [],
-      limit: 12,
-    });
-  const similarProducts = similarProductsData?.map(
-    (productData) => productData.product,
-  );
+    const { data: similarProductsData, isLoading: isLoadingSimilar } =
+      useProductRecommendations({
+        productIds: productIds,
+        categorySlugs: categorySlug,
+        limit: 12,
+      });
 
-  if (similarProducts?.length > 0) {
-    return (
-      <div className="mt-10">
-        <h2 className="mb-2 text-center text-xl lg:mb-4">
-          {heading ? heading : 'You might also like'}
-        </h2>
-        <div className="flex w-full justify-center">
-          <div className="flex w-full max-w-5xl flex-col gap-2">
-            {isLoadingSimilar ? (
-              <SkeletonComponent />
-            ) : (
-              <>
-                <ProductGrid
-                  products={similarProducts}
-                  showAddToCartBtn={true}
-                  onClick={handleProductClick}
-                />
-              </>
-            )}
+    const similarProducts = similarProductsData?.map(
+      (productData) => productData.product,
+    );
+
+    if (similarProducts?.length > 0) {
+      return (
+        <div className="my-10">
+          <h2 className="mb-2 text-center text-xl lg:mb-4">
+            {heading ? heading : 'You might also like'}
+          </h2>
+          <div className="flex w-full justify-center">
+            <div className="flex w-full max-w-5xl flex-col gap-2">
+              {isLoadingSimilar ? (
+                <SkeletonComponent />
+              ) : (
+                <>
+                  <ProductGrid
+                    products={similarProducts}
+                    showAddToCartBtn={true}
+                    onClick={handleProductClick}
+                  />
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  return null;
-};
+    return null;
+  },
+);
 
 export default ProductRecommendations;

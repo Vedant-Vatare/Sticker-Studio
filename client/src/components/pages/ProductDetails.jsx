@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Heart,
@@ -167,19 +167,22 @@ export default function ProductPage() {
   const { productId } = useParams();
   const { data: product, isLoading: productLoading } =
     useProductDetails(productId);
-  const { data: variantDetails, isLoading: variantLoading } =
+  const { data: productVariantDetails, isLoading: variantLoading } =
     useProductVariant(productId);
   const { data: cartItems } = useCartQuery();
 
   const [selectedOptions, setSelectedOptions] = useState({});
 
   const groupedOptions = useMemo(() => {
-    if (!variantDetails?.options || variantDetails.options.length === 0)
+    if (
+      !productVariantDetails?.options ||
+      productVariantDetails.options.length === 0
+    )
       return [];
 
     const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL'];
 
-    return variantDetails.options
+    return productVariantDetails.options
       .reduce((acc, currentOption) => {
         const optionName = currentOption.name;
         const optionIndex = acc.findIndex((opt) => opt.name === optionName);
@@ -216,7 +219,7 @@ export default function ProductPage() {
         return option;
       })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [variantDetails]);
+  }, [productVariantDetails]);
 
   // populating initial group of options with empty strings
   useEffect(() => {
@@ -228,18 +231,30 @@ export default function ProductPage() {
   }, [groupedOptions]);
 
   const selectedvariant = useMemo(() => {
-    const optionIds = Object.values(selectedOptions);
+    const optionIds = Object.values(selectedOptions).filter((id) => id !== '');
 
-    if (!variantDetails || optionIds.some((id) => id === '')) {
+    if (!productVariantDetails) {
       return null;
     }
 
-    const variantFound = variantDetails.variants?.find((variant) => {
+    const variantFound = productVariantDetails.variants?.find((variant) => {
       return variant.variant.every((v) => optionIds.includes(v));
     });
 
-    return variantFound || null;
-  }, [variantDetails, selectedOptions]);
+    if (!variantFound) {
+      return null;
+    }
+
+    const containsAllOptions = optionIds.every((id) =>
+      variantFound?.variant.includes(id),
+    );
+
+    if (!containsAllOptions) {
+      return null;
+    }
+
+    return variantFound;
+  }, [productVariantDetails, selectedOptions]);
 
   const isVariantAvailable = selectedvariant !== null;
 
@@ -305,7 +320,7 @@ export default function ProductPage() {
                 {product.stock <= 0 && <b>Out of Stock</b>}
               </span>
             </div>
-            {variantDetails.options.length > 0 && (
+            {productVariantDetails.options.length > 0 && (
               <div className="relative ml-2 flex items-center">
                 <span className="text-destructive tracking-wide">
                   {Object.values(selectedOptions).every((id) => id !== '') &&

@@ -18,12 +18,18 @@ const ProductOptions = ({
           {values.map((color) => (
             <button
               key={color.id}
-              onClick={() =>
-                setSelectedOptions((options) => ({
+              onClick={() => {
+                if (selectedOptions.Color === color.id) {
+                  return setSelectedOptions((options) => ({
+                    ...options,
+                    Color: '',
+                  }));
+                }
+                return setSelectedOptions((options) => ({
                   ...options,
                   Color: color.id,
-                }))
-              }
+                }));
+              }}
               className={`relative h-9 w-9 rounded-full border transition ${
                 selectedOptions.Color === color.id
                   ? 'border-primary scale-110'
@@ -63,12 +69,18 @@ const ProductOptions = ({
                 : 'border-border hover:border-primary/50'
             }`}
             key={option.id}
-            onClick={() =>
-              setSelectedOptions((options) => ({
+            onClick={() => {
+              if (selectedOptions[name] === option.id) {
+                return setSelectedOptions((options) => ({
+                  ...options,
+                  [name]: '',
+                }));
+              }
+              return setSelectedOptions((options) => ({
                 ...options,
                 [name]: option.id,
-              }))
-            }
+              }));
+            }}
             title={option.value}
           >
             {option.value}
