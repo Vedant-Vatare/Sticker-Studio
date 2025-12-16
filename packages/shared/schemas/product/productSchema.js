@@ -9,7 +9,10 @@ const productSchema = z.object({
   slug: z
     .string()
     .min(2)
-    .transform((val) => val.trim()),
+    .transform((val) => {
+      val.trim();
+      return val.split(' ').join('-').toLowerCase();
+    }),
   description: z
     .string()
     .max(1000, 'Description must be under 1000 characters.')

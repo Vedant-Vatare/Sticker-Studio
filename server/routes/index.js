@@ -7,10 +7,11 @@ import CategoryRouter from './categoryRouter.js';
 import variantRouter from './product/variantRouter.js';
 import productSpecsRouter from './product/specificationRouter.js';
 import productDimensionsRouter from './product/dimensionsRouter.js';
-
+import wishlistRouter from './product/wishlistRouter.js';
 const router = Router();
 router.use('/user', userRouter);
 router.use('/product', productRouter);
+router.use('/wishlist', wishlistRouter);
 router.use('/category', CategoryRouter);
 router.use('/cart', cartRouter);
 router.use('/order', orderRouter);
