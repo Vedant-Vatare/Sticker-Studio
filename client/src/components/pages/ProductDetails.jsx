@@ -19,6 +19,7 @@ import ProductOptions from '../product/ProductOptions';
 import { Badge } from '../ui/badge';
 import ProductInfo from '../product/ProductInformation';
 import ProductRecommendations from '../product/ProductRecommendations';
+import WishlistButton from '../product/WishlistButton';
 
 const ProductPageSkeleton = () => {
   return (
@@ -83,8 +84,6 @@ const ProductPageSkeleton = () => {
 
 const ProductImages = ({ product, variant }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(true);
-
   const selectedProduct =
     variant && variant.images.length > 0 ? variant : product;
   const productImages = selectedProduct.images;
@@ -128,20 +127,7 @@ const ProductImages = ({ product, variant }) => {
           </>
         )}
       </div>
-      <div>
-        <Button
-          size={'icon'}
-          variant={'outline'}
-          onClick={() => setIsWishlisted(!isWishlisted)}
-          className={`absolute top-1 right-1 h-9 w-9 cursor-pointer transition sm:top-3 sm:right-3 ${
-            isWishlisted
-              ? 'bg-destructive/10 hover:bg-destructive/10 text-destructive hover:text-destructive'
-              : 'border-border text-foreground'
-          }`}
-        >
-          <Heart className={`h-7 w-7 ${isWishlisted && 'fill-current'}`} />
-        </Button>
-      </div>
+      <WishlistButton product={product} />
       <div className="flex gap-3">
         {productImages.map((image, index) => (
           <div

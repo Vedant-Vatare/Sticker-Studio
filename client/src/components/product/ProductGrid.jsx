@@ -44,7 +44,7 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
         {products.map((product, index) => (
           <motion.div
             key={index}
-            onClick={() => handleProductClick(product?.slug || product?.id)}
+            onClick={() => handleProductClick(product?.slug ?? product?.id)}
             className="outline-foreground flex h-full w-full cursor-pointer flex-col items-center justify-between rounded-sm p-2"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
