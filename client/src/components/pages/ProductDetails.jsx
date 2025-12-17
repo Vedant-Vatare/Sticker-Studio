@@ -100,7 +100,7 @@ const ProductImages = ({ product, variant }) => {
 
   return (
     <div className="relative flex flex-col gap-4">
-      <div className="bg-muted/45 relative flex aspect-square cursor-grabbing items-center justify-center overflow-hidden rounded-none select-none">
+      <div className="relative flex aspect-square cursor-grabbing items-center justify-center overflow-hidden rounded-sm select-none">
         <img
           src={productImages[currentImageIndex]}
           alt={`Product image ${currentImageIndex + 1}`}
@@ -128,12 +128,12 @@ const ProductImages = ({ product, variant }) => {
         )}
       </div>
       <WishlistButton product={product} />
-      <div className="flex gap-3">
+      <div className="[&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50 flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:h-1 md:[&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
         {productImages.map((image, index) => (
           <div
             key={index}
             onClick={() => setCurrentImageIndex(index)}
-            className={`h-24 w-24 scale-95 cursor-pointer overflow-hidden rounded-lg border-2 brightness-90 transition ${
+            className={`h-24 w-24 shrink-0 scale-95 cursor-pointer overflow-hidden rounded-lg border brightness-90 transition ${
               index === currentImageIndex && ' scale-100 brightness-100'
             }`}
           >

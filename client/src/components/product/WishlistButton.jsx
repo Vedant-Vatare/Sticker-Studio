@@ -19,12 +19,13 @@ const WishlistButton = ({ product }) => {
     <Button
       size={'icon'}
       variant={'outline'}
-      onClick={() =>
+      onClick={(e) => {
+        e.stopPropagation();
         productWishlist.inWishlist
           ? removeFromWishlist(product.id)
-          : addToWishlist(product.id)
-      }
-      className={`absolute top-1 right-1 h-9 w-9 cursor-pointer border-none transition outline-none focus:border-none sm:top-3 sm:right-3 ${
+          : addToWishlist(product.id);
+      }}
+      className={`absolute top-1 right-1 z-50 h-9 w-9 cursor-pointer border-none transition outline-none focus:border-none sm:top-3 sm:right-3 ${
         productWishlist.inWishlist
           ? 'hover:text-destructive bg-[#F73B9C]/10 text-[#F73B9C] hover:bg-[#F73B9C]/10'
           : 'border-border text-foreground'

@@ -111,6 +111,7 @@ const AccountButton = () => {
 const RootHeaderLayout = () => {
   const { data: cartItems } = useCartQuery();
   const isDesktop = useMediaQuery('(min-width: 768px)');
+  const path = useLocation().pathname;
 
   return (
     <header className="sticky top-0 z-999 bg-white shadow-md">
@@ -157,20 +158,20 @@ const RootHeaderLayout = () => {
 
           <div className="flex items-center gap-2 md:gap-4">
             <Link
-              to="/cart"
+              to="/wishlist"
               className={`${buttonVariants({
-                variant: 'outline',
+                variant: path === '/wishlist' ? 'default' : 'outline',
                 size: 'icon',
-              })} bg-primary-foreground relative inline-flex aspect-square h-10 w-10 items-center justify-center p-0 md:hidden`}
+              })} relative inline-flex aspect-square h-10 w-10 items-center justify-center p-0 md:hidden`}
             >
               <Heart className="h-5 w-5" />
             </Link>
             <Link
               to="/cart"
               className={`${buttonVariants({
-                variant: 'outline',
+                variant: path === '/cart' ? 'default' : 'outline',
                 size: 'icon',
-              })} bg-primary-foreground relative inline-flex aspect-square h-10 w-10 items-center justify-center p-0`}
+              })} } relative inline-flex aspect-square h-10 w-10 items-center justify-center border-1`}
             >
               {!isNaN(cartItems?.length) && cartItems.length > 0 && (
                 <span className="bg-primary absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full font-sans text-xs font-semibold text-white">

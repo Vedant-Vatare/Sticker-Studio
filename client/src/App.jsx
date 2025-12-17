@@ -19,6 +19,7 @@ const SetPassword = lazy(() => import('./components/pages/auth/SetupPassword'));
 const Login = lazy(() => import('./components/pages/auth/Login'));
 const Signup = lazy(() => import('./components/pages/auth/Signup'));
 const Cart = lazy(() => import('./components/pages/Cart'));
+const Wishlist = lazy(() => import('./components/pages/Wishlist'));
 const Checkout = lazy(() => import('./components/pages/Checkout'));
 const Shop = lazy(() => import('./components/pages/Shop'));
 const ProductSearch = lazy(() => import('./components/pages/ProductSearch'));
@@ -45,6 +46,7 @@ function App() {
             <Route path="/addresses" element={<Address />} />
             <Route path="/settings" element={<>settings</>} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route
               path="/shop/:collectionSlug"

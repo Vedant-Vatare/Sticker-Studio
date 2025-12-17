@@ -2,6 +2,7 @@ import { Button } from '../ui/button';
 import { motion, stagger } from 'motion/react';
 import { useAddToCartQuery, useCartQuery } from '@/hooks/cart';
 import { useNavigate } from 'react-router-dom';
+import WishlistButton from './WishlistButton';
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -24,7 +25,11 @@ const formatPrice = (amount) => {
   }).format(amount);
 };
 
-const ProductGrid = ({ products, showAddToCartBtn }) => {
+const ProductGrid = ({
+  products,
+  showAddToCartBtn,
+  showWishlistBtn = false,
+}) => {
   const { data: cartItems } = useCartQuery();
   const { mutateAsync: addToCartQuery } = useAddToCartQuery();
   const navigate = useNavigate();
@@ -45,7 +50,7 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
           <motion.div
             key={index}
             onClick={() => handleProductClick(product?.slug ?? product?.id)}
-            className="outline-foreground flex h-full w-full cursor-pointer flex-col items-center justify-between rounded-sm p-2"
+            className="outline-foreground relative flex h-full w-full cursor-pointer flex-col items-center justify-between rounded-sm p-2"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
             viewport={{ once: true, amount: 0.1 }}
@@ -54,16 +59,16 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
               stiffness: 100,
               delay: Math.min(index * 0.01, 2),
             }}
-            whileHover={{ scale: 1.05, y: -5 }}
           >
             <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-md">
               <img
                 loading="lazy"
-                src={product.image || product.images[0]}
+                src={product.images[0] || product.image}
                 alt={product.alt || 'Product image'}
                 className="h-full w-full object-contain transition-transform duration-300 hover:scale-110"
               />
             </div>
+
             <div className="mt-2 w-full text-left">
               <span
                 className="font-heading overflow-hidden text-ellipsis"
@@ -83,7 +88,13 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
             {showAddToCartBtn && (
               <>
                 {cartItems?.some((item) => item.product.id === product.id) ? (
-                  <Button className="mt-1 w-full self-start outline">
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/cart');
+                    }}
+                    className="mt-1 w-full self-start outline"
+                  >
                     View in Cart
                   </Button>
                 ) : (
@@ -100,6 +111,7 @@ const ProductGrid = ({ products, showAddToCartBtn }) => {
                 )}
               </>
             )}
+            {!!showWishlistBtn && <WishlistButton product={product} />}
           </motion.div>
         ))}
       </div>

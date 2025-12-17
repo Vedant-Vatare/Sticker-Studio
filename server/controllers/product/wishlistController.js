@@ -3,6 +3,23 @@ import prisma from '../../db/db.js';
 export async function getWishlist(req, res) {
   const wishlist = await prisma.wishlist.findMany({
     where: { userId: req.userId },
+    select: {
+      id: true,
+      productId: true,
+      createdAt: true,
+      product: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          slug: true,
+          stock: true,
+          price: true,
+          basePrice: true,
+          images: true,
+        },
+      },
+    },
   });
 
   return res
@@ -19,6 +36,23 @@ export async function addToWishlist(req, res) {
       data: {
         userId: req.userId,
         productId,
+      },
+      select: {
+        id: true,
+        productId: true,
+        createdAt: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            slug: true,
+            stock: true,
+            price: true,
+            basePrice: true,
+            images: true,
+          },
+        },
       },
     });
     return res.status(201).json({
