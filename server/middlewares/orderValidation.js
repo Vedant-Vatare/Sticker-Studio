@@ -1,5 +1,6 @@
 import prisma from '../db/db.js';
 import { createOrderSchema } from 'shared/schemas/orderSchema.js';
+import { z } from 'zod';
 
 export async function validateCreateOrder(req, res, next) {
   try {
@@ -20,52 +21,44 @@ export async function validateCreateOrder(req, res, next) {
       });
     }
 
-    const orderProducts = await prisma.product.findMany({
-      where: { id: { in: userOrderProductIds } },
+    const dbProducts = await prisma.product.findMany({
+      where: {
+        id: { in: userOrderProductIds },
+      },
+      select: {
+        id: true,
+        price: true,
+      },
     });
 
-    if (orderProducts.length !== userOrderProducts.length) {
+    if (dbProducts.length !== userOrderProducts.length) {
+      const foundIds = new Set(dbProducts.map((p) => p.id));
+      const unavailableProducts = userOrderProductIds.filter(
+        (id) => !foundIds.has(id),
+      );
+
       return res.status(400).json({
         error: 'Some products in the order are not available.',
-        unavailableProducts: userOrderProductIds.filter(
-          (id) => !orderProducts.find((product) => product.id === id),
-        ),
+        unavailableProducts,
       });
     }
 
-    for (const product of orderProducts) {
-      const userProduct = userOrderProducts.find(
-        (item) => item.productId === product.id,
-      );
+    const productMap = new Map(dbProducts.map((p) => [p.id, p]));
 
-      if (product.stock < 1) {
-        return res.status(400).json({
-          error: `Product ${product.id} is out of stock.`,
-        });
-      }
+    let totalAmount = 0;
 
-      if (userProduct.quantity > product.stock) {
-        return res.status(400).json({
-          error: `Insufficient stock for product ${product.id}.`,
-          availableStock: product.stock,
-          requestedQuantity: userProduct.quantity,
-        });
-      }
-
-      // attach ordered quantity for later use
-      product.orderedQuantity = userProduct.quantity;
-    }
-
-    const totalAmount = orderProducts.reduce((acc, item) => {
-      return acc + item.price * item.orderedQuantity;
-    }, 0);
+    const validatedItems = userOrderProducts.map((item) => {
+      const product = productMap.get(item.productId);
+      totalAmount += product.price * item.quantity;
+      return {
+        id: item.productId,
+        price: product.price,
+        orderedQuantity: item.quantity,
+      };
+    });
 
     req.orderData = {
-      orderItems: orderProducts.map((p) => ({
-        id: p.id,
-        price: p.price,
-        orderedQuantity: p.orderedQuantity,
-      })),
+      orderItems: validatedItems,
       totalAmount,
     };
 

@@ -76,6 +76,7 @@ model Product {
   images                String[]
   defaultVariantId      String?                  @unique
   stock                 Int?                     @default(0)
+  reservedStock         Int?                     @default(0)
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
   UserCart              UserCart[]

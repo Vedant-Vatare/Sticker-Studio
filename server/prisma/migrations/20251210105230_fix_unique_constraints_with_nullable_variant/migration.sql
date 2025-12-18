@@ -6,10 +6,10 @@
 
 */
 -- DropIndex
-DROP INDEX "ProductDimension_productId_key";
+DROP INDEX IF EXISTS "ProductDimension_productId_key";
 
 -- DropIndex
-DROP INDEX "ProductSpecification_productId_key";
+DROP INDEX IF EXISTS "ProductSpecification_productId_key";
 
 -- AlterTable
 ALTER TABLE "ProductDimension" ADD COLUMN     "thickness" DOUBLE PRECISION,
