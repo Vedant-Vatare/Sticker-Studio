@@ -208,3 +208,56 @@ export async function verifyOrder(req, res) {
     });
   }
 }
+
+export async function cancelOrder(req, res) {
+  try {
+    const { orderId } = req.body;
+
+    const order = await prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({
+        where: { id: orderId, userId: req.userId },
+        include: { orderItems: true },
+      });
+
+      if (!order) {
+        throw new Error('Order not found');
+      }
+
+      if (order.orderStatus !== 'pending') {
+        throw new Error('Cannot cancel order that is already processed');
+      }
+
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          orderStatus: 'cancelled',
+        },
+        include: { orderItems: true },
+      });
+
+      await Promise.all(
+        order.orderItems.map((item) =>
+          tx.product.update({
+            where: { id: item.productId },
+            data: {
+              reservedStock: { decrement: item.quantity },
+            },
+          }),
+        ),
+      );
+
+      return updatedOrder;
+    });
+
+    return res.status(200).json({
+      message: 'Order cancelled successfully',
+      order,
+    });
+  } catch (error) {
+    console.error('Order cancellation error:', error);
+    return res.status(500).json({
+      message: 'Failed to cancel order',
+      error: error.message,
+    });
+  }
+}

@@ -13,8 +13,9 @@ import { useUserStore } from '@/store/userStore';
 import { useLoginModal } from '@/store/userStore';
 import { usePlaceOrder } from '@/hooks/order';
 import { useRazorpay } from 'react-razorpay';
-import { verifyPayment } from '@/services/order';
+import { cancelOrder, verifyPayment } from '@/services/order';
 import { ShippingAddressSection } from '../user/ShippingAddress';
+import { toast } from 'sonner';
 
 const Checkout = () => {
   const { data: cartItems, isLoading, isError } = useCartQuery();
@@ -23,7 +24,7 @@ const Checkout = () => {
   const { Razorpay } = useRazorpay();
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [shippingAddressId, setShippingAddressId] = useState(false);
+  const [shippingAddressId, setShippingAddressId] = useState(null);
   const setBreadcrumbs = breadcrumbStore((state) => state.setBreadcrumbs);
   const openLoginModal = useLoginModal((state) => state.openModal);
   const subtotal =
@@ -53,17 +54,21 @@ const Checkout = () => {
       productId: item.product.id,
       quantity: item.quantity,
     }));
-    const order = await placeOrder({ orderItems, shippingAddressId });
+    const placedOrder = await placeOrder({ orderItems, shippingAddressId });
 
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY,
       name: 'Sticker Studio',
       description: 'Test Transaction',
-      order_id: order.razorpay.orderId,
-      amount: order.razorpay.amount,
-      currency: order.razorpay.currency,
+      order_id: placedOrder.razorpay.orderId,
+      amount: placedOrder.razorpay.amount,
+      currency: placedOrder.razorpay.currency,
       handler: async (razorpayResponse) => {
-        const razorpayVerification = await verifyPayment(razorpayResponse);
+        try {
+          await verifyPayment(razorpayResponse);
+        } catch (e) {
+          toast.error('failed to verify payment status');
+        }
       },
       prefill: {
         name: 'test user',
@@ -73,9 +78,27 @@ const Checkout = () => {
       theme: {
         color: '#2563eb',
       },
+      modal: {
+        ondismiss: async () => {
+          try {
+            await cancelOrder(placedOrder.order.id);
+            toast.info('your order was cancelled');
+          } catch (e) {
+            toast.error('failed to cancel the order');
+          }
+        },
+      },
     };
 
     const razorpayInstance = new Razorpay(options);
+    razorpayInstance.on('payment.failed', async () => {
+      try {
+        await cancelOrder(placedOrder.order.id);
+        toast.info('your order was cancelled');
+      } catch (e) {
+        toast.error('failed to cancel the order');
+      }
+    });
     razorpayInstance.open();
   };
 
