@@ -47,7 +47,7 @@ const OrderCard = ({ order }) => {
     navigate(`/order/${order.id}`);
   };
   return (
-    <Card className="border-muted min-w-xs rounded-sm border-2 px-1 py-4">
+    <Card className="border-muted w-full min-w-xs rounded-sm border-2 px-1 py-4">
       <CardHeader className={'font-heading w-full gap-0.5 px-2 text-sm'}>
         <CardTitle className="text-base capitalize">
           {order.orderStatus}
@@ -122,10 +122,10 @@ const OrderPage = () => {
 
   if (orders?.length > 0) {
     return (
-      <div className="mx-auto max-w-4xl px-2 py-8 md:mt-5">
+      <div className="mx-auto w-full px-2 py-8 sm:w-max md:mt-5">
         <h1 className="text-foreground page-title">Orders</h1>
 
-        <div className="mt-5 flex w-full flex-col gap-5 md:flex-row">
+        <div className="mt-5 grid w-full grid-cols-1 justify-items-center gap-2 gap-y-7 sm:grid-cols-3 sm:gap-6 md:grid-cols-4">
           {orders.map((order) => (
             <OrderCard order={order} key={order.id} />
           ))}
