@@ -11,6 +11,7 @@ export async function getUserCart(req, res) {
         select: {
           id: true,
           name: true,
+          slug: true,
           description: true,
           images: true,
           price: true,
@@ -33,7 +34,17 @@ export async function getUserCart(req, res) {
   if (!cart) {
     return res.status(404).json({ message: 'Cart not found' });
   }
-  res.json({ message: 'Cart fetched successfully', cart });
+
+  const variantIds = cart.flatMap((item) => item.variant?.variant ?? []);
+
+  const options = await prisma.option.findMany({
+    where: {
+      id: {
+        in: variantIds,
+      },
+    },
+  });
+  res.json({ message: 'Cart fetched successfully', cart, options });
 }
 
 export async function addToCart(req, res) {
@@ -114,7 +125,7 @@ export async function updateCartItem(req, res) {
     });
 
     // check stock of variant if it exists otherwise use from product
-    const availableStock = cartItem.variant
+    const availableStock = cartItem?.variant
       ? cartItem.variant.stock - (cartItem.variant.reservedStock || 0)
       : cartItem.product.stock - (cartItem.product.reservedStock || 0);
 

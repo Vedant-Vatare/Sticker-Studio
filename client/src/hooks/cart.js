@@ -5,6 +5,7 @@ import {
   removeProductFromCart,
   updateProductInCart,
 } from '../services/product/cart';
+import { toast } from 'sonner';
 
 export const useCartQuery = () => {
   return useQuery({
@@ -15,41 +16,22 @@ export const useCartQuery = () => {
   });
 };
 
-export const useAddToCartQuery = () => {
+export const useAddToCartMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ['cart'],
     mutationFn: addProductToCart,
 
-    onMutate: async (product) => {
-      await queryClient.cancelQueries({ queryKey: ['cart'] });
-
-      const previousCart = queryClient.getQueryData(['cart']);
-
-      queryClient.setQueryData(['cart'], (old = []) => {
-        const optimisticItem = {
-          product,
-          quantity: 1,
-        };
-        return [...old, optimisticItem];
-      });
-
-      return { previousCart };
-    },
-
-    onSuccess: (data, product, context) => {
-      queryClient.setQueryData(['cart'], (old = []) => {
-        return old.map((item) =>
-          item.product.id === product.id ? { ...item, ...data } : item,
-        );
+    onSuccess: (newCartItem) => {
+      queryClient.setQueryData(['cart'], (oldCart = []) => {
+        return [...oldCart, newCartItem];
       });
     },
 
-    onError: (error, product, context) => {
-      if (context?.previousCart) {
-        queryClient.setQueryData(['cart'], context.previousCart);
-      }
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+      toast.error('failed to add to cart');
     },
   });
 };

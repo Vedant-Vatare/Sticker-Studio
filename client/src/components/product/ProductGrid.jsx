@@ -1,6 +1,4 @@
-import { Button } from '../ui/button';
 import { motion, stagger } from 'motion/react';
-import { useAddToCartQuery, useCartQuery } from '@/hooks/cart';
 import { useNavigate } from 'react-router-dom';
 import WishlistButton from './WishlistButton';
 
@@ -27,11 +25,9 @@ const formatPrice = (amount) => {
 
 const ProductGrid = ({
   products,
-  showAddToCartBtn,
+
   showWishlistBtn = false,
 }) => {
-  const { data: cartItems } = useCartQuery();
-  const { mutateAsync: addToCartQuery } = useAddToCartQuery();
   const navigate = useNavigate();
 
   const handleProductClick = (identifier) => {
@@ -85,32 +81,7 @@ const ProductGrid = ({
                 {formatPrice(product.price)}
               </span>
             </div>
-            {showAddToCartBtn && (
-              <>
-                {cartItems?.some((item) => item.product.id === product.id) ? (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate('/cart');
-                    }}
-                    className="mt-1 w-full self-start outline"
-                  >
-                    View in Cart
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCartQuery(product);
-                    }}
-                    variant={'outline'}
-                    className="mt-1 w-full self-start outline"
-                  >
-                    Add to Cart
-                  </Button>
-                )}
-              </>
-            )}
+
             {!!showWishlistBtn && <WishlistButton product={product} />}
           </motion.div>
         ))}

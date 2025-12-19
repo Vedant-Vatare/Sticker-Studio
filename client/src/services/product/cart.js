@@ -10,9 +10,17 @@ export const fetchUserCart = async () => {
   return response.data.cart;
 };
 
-export const addProductToCart = async (product) => {
-  const response = await axios.post('/cart/add', { productId: product.id });
-  return response.data.cartItem;
+export const addProductToCart = async ({ product, variant }) => {
+  try {
+    const response = await axios.post('/cart/add', {
+      productId: product.id,
+      variantId: variant?.id || null,
+    });
+
+    return response.data.cartItem;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const updateProductInCart = async ({ cartItemId, updatedQuantity }) => {

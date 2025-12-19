@@ -14,12 +14,13 @@ import { Button } from '@/components/ui/button';
 import { useProductDetails, useProductVariant } from '@/hooks/product';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { useCartQuery } from '@/hooks/cart';
+import { useAddToCartMutation, useCartQuery } from '@/hooks/cart';
 import ProductOptions from '../product/ProductOptions';
 import { Badge } from '../ui/badge';
 import ProductInfo from '../product/ProductInformation';
 import ProductRecommendations from '../product/ProductRecommendations';
 import WishlistButton from '../product/WishlistButton';
+import LoadingDots from '../ui/LoadingDots';
 
 const ProductPageSkeleton = () => {
   return (
@@ -149,15 +150,65 @@ const ProductImages = ({ product, variant }) => {
   );
 };
 
+const CartButton = ({
+  product,
+  hasVariants,
+  variant,
+  showSelectVariantMSG,
+}) => {
+  const { data: cartItems, isLoading, isSuccess } = useCartQuery();
+  const { mutate: addTocart, isPending } = useAddToCartMutation();
+
+  if (isLoading || !isSuccess) return null;
+
+  const isAddedInCart = cartItems?.some(
+    (item) =>
+      item.product.id === product.id && item?.variant?.id === variant?.id,
+  );
+  console.log({ cartItems, product, variant, isAddedInCart });
+
+  if (isAddedInCart) {
+    return (
+      <Button
+        className="flex-1 gap-2 rounded-sm text-base"
+        size="lg"
+        variant={'outline'}
+        asChild
+      >
+        <Link to={'/cart'}>View in Cart</Link>
+      </Button>
+    );
+  }
+  return (
+    <>
+      <Button
+        className="flex-1 gap-2 rounded-sm text-base"
+        size="lg"
+        variant={'outline'}
+        onClick={() => {
+          if (hasVariants && !variant) {
+            showSelectVariantMSG(true);
+            return;
+          }
+          addTocart({ product, variant });
+        }}
+      >
+        <ShoppingBagIcon className="h-5 w-5" />
+        {isPending ? <LoadingDots /> : 'Add to Cart'}
+      </Button>
+    </>
+  );
+};
+
 export default function ProductPage() {
   const { identifier } = useParams();
   const { data: product, isLoading: productLoading } =
     useProductDetails(identifier);
   const { data: productVariantDetails, isLoading: variantLoading } =
     useProductVariant(product?.id);
-  const { data: cartItems } = useCartQuery();
 
   const [selectedOptions, setSelectedOptions] = useState({});
+  const [showSelectVariantMsg, setShowSelectVariantMsg] = useState(false);
 
   const groupedOptions = useMemo(() => {
     if (
@@ -243,6 +294,7 @@ export default function ProductPage() {
   }, [productVariantDetails, selectedOptions]);
 
   const isVariantAvailable = selectedvariant !== null;
+  showSelectVariantMsg && selectedvariant && setShowSelectVariantMsg(false);
 
   const handleVariantChange = useCallback((newVariant) => {
     setSelectedOptions(newVariant);
@@ -307,14 +359,21 @@ export default function ProductPage() {
               </span>
             </div>
             {productVariantDetails.options.length > 0 && (
-              <div className="relative ml-2 flex items-center">
+              <div className="relative ml-2 flex flex-col">
                 <span className="text-destructive tracking-wide">
                   {Object.values(selectedOptions).every((id) => id !== '') &&
                     !isVariantAvailable && (
-                      <span className="absolute -top-2 text-sm font-medium">
+                      <span className="text-sm font-medium">
                         Selected variant is not available
                       </span>
                     )}
+                </span>
+                <span className="text-destructive tracking-wide">
+                  {showSelectVariantMsg && (
+                    <span className="text-sm font-medium">
+                      select a variant first
+                    </span>
+                  )}
                 </span>
               </div>
             )}
@@ -323,25 +382,12 @@ export default function ProductPage() {
               <Button className="flex-1 rounded-sm text-base" size="lg">
                 Buy Now
               </Button>
-              {cartItems?.some((item) => item.product.id === product.id) ? (
-                <Button
-                  className="bg-muted-foreground/10 flex-1 gap-2 rounded-sm text-base"
-                  size="lg"
-                  variant={'outline'}
-                  asChild
-                >
-                  <Link to={'/cart'}>View in Cart</Link>
-                </Button>
-              ) : (
-                <Button
-                  className="flex-1 gap-2 rounded-sm text-base"
-                  size="lg"
-                  variant={'outline'}
-                >
-                  <ShoppingBagIcon className="h-5 w-5" />
-                  Add to Cart
-                </Button>
-              )}
+              <CartButton
+                product={product}
+                variant={selectedvariant}
+                hasVariants={productVariantDetails.variants.length > 0}
+                showSelectVariantMSG={setShowSelectVariantMsg}
+              />
             </div>
             <Separator />
             <div className="grid grid-cols-2 place-items-start gap-2 text-xs select-none">
