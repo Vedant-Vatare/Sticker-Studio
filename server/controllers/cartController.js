@@ -1,4 +1,5 @@
 import prisma from '../db/db.js';
+import { isValidVariant, productHaveVariant } from '../utils/product.js';
 
 export async function getUserCart(req, res) {
   const cart = await prisma.userCart.findMany({
@@ -14,6 +15,16 @@ export async function getUserCart(req, res) {
           images: true,
           price: true,
           stock: true,
+          reservedStock: true,
+        },
+      },
+      variant: {
+        select: {
+          id: true,
+          images: true,
+          stock: true,
+          price: true,
+          variant: true,
         },
       },
     },
@@ -27,28 +38,54 @@ export async function getUserCart(req, res) {
 
 export async function addToCart(req, res) {
   try {
-    const { productId } = req.body;
+    const { productId, variantId } = req.body;
+
     if (!productId) {
       return res.status(400).json({ message: 'Product ID is required' });
+    }
+
+    const hasVariant = await productHaveVariant(productId);
+
+    if (hasVariant && !variantId) {
+      return res.status(409).json({ message: 'select a variant for product' });
+    }
+
+    if (variantId) {
+      const validVariant = await isValidVariant(productId, variantId);
+
+      if (!validVariant) {
+        return res
+          .status(400)
+          .json({ message: 'Variant does not belong to this product' });
+      }
     }
 
     const cartItem = await prisma.userCart.create({
       data: {
         userId: req.userId,
-        productId: productId,
-        quantity: 1,
+        productId,
+        variantId: variantId ?? null,
       },
-      include: { product: true },
+      include: {
+        product: true,
+        variant: true,
+      },
     });
-    res.status(201).json({ message: 'Product added to cart', cartItem });
+
+    return res.status(201).json({
+      message: 'Product added to cart',
+      cartItem,
+    });
   } catch (e) {
     if (e.code === 'P2002') {
+      return res.status(409).json({ message: 'product is already in cart' });
+    }
+    if (e.code === 'P2003') {
       return res
         .status(409)
-        .json({ message: 'Product already in cart', error: e.message });
+        .json({ message: 'Invalid product Id or variant Id' });
     }
-
-    throw error;
+    throw e;
   }
 }
 
@@ -56,16 +93,56 @@ export async function updateCartItem(req, res) {
   try {
     const { cartItemId, quantity } = req.body;
 
-    const cartItem = await prisma.userCart.update({
+    const cartItem = await prisma.userCart.findUnique({
+      where: {
+        id: cartItemId,
+      },
+      select: {
+        product: {
+          select: {
+            stock: true,
+            reservedStock: true,
+          },
+        },
+        variant: {
+          select: {
+            stock: true,
+            // add reserved stock later
+          },
+        },
+      },
+    });
+
+    // check stock of variant if it exists otherwise use from product
+    const availableStock = cartItem.variant
+      ? cartItem.variant.stock - (cartItem.variant.reservedStock || 0)
+      : cartItem.product.stock - (cartItem.product.reservedStock || 0);
+
+    if (availableStock < quantity) {
+      return res.json({
+        message: 'Insufficient stock available.',
+        availableStock,
+      });
+    }
+
+    const updatedCartItem = await prisma.userCart.update({
       where: {
         id: cartItemId,
       },
       data: {
         quantity: quantity,
       },
+      select: {
+        id: true,
+        quantity: true,
+        product: true,
+        variant: true,
+      },
     });
 
-    res.json({ message: 'Cart item updated successfully', cartItem });
+    return res
+      .status(200)
+      .json({ message: 'Cart item updated successfully', updatedCartItem });
   } catch (error) {
     if (error.code === 'P2025') {
       return res.status(400).json({ message: 'Cart item not found' });
@@ -84,6 +161,7 @@ export async function removeFromCart(req, res) {
     await prisma.userCart.delete({
       where: {
         id: cartItemId,
+        userId: req.userId,
       },
     });
 
