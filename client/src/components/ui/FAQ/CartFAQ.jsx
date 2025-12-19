@@ -45,7 +45,6 @@ export default function CartFAQ() {
           type="single"
           collapsible
           className="w-full rounded-md border"
-          defaultValue="item-1"
         >
           {cartFAQ.map((item, index) => (
             <AccordionItem key={index} value={`item-${index + 1}`}>

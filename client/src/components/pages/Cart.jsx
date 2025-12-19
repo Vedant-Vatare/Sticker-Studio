@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { X, Plus, Minus } from 'lucide-react';
 import { useEffect } from 'react';
 import {
@@ -12,15 +12,16 @@ import {
 import ServerError from './ServerError';
 import { breadcrumbStore } from '@/store/globalStore';
 
-import ProductGrid from '../product/ProductGrid';
 import CartFAQ from '../ui/FAQ/CartFAQ';
 
 const Cart = () => {
-  const { data: cartItems, isLoading, isError } = useCartQuery();
-  const cartValue = cartItems?.reduce(
-    (total, item) => total + item.product.price * item.quantity,
-    0,
-  );
+  const {
+    data: { cartItems } = {},
+    isLoading,
+    isSuccess,
+    isError,
+  } = useCartQuery();
+
   const setBreadcrumbs = breadcrumbStore((state) => state.setBreadcrumbs);
 
   useEffect(() => {
@@ -32,13 +33,18 @@ const Cart = () => {
     return () => setBreadcrumbs([]);
   }, []);
 
-  if (isLoading) {
+  if ((isLoading, !isSuccess)) {
     return <CartSkeleton />;
   }
 
   if (isError) {
     return <ServerError />;
   }
+
+  const cartValue = cartItems?.reduce((total, item) => {
+    const price = item?.variant ? item.variant.price : item.product.price;
+    return total + price * item.quantity;
+  }, 0);
 
   return (
     <>
@@ -100,17 +106,36 @@ const Cart = () => {
 };
 
 const CartItem = ({ item }) => {
-  const { product, quantity, id } = item;
+  const naviagate = useNavigate();
+  const { data: { options } = {} } = useCartQuery();
+  const { product, variant, quantity, id } = item;
   const { mutateAsync: updateCartItem } = useUpdateCartItemQuery();
   const { mutateAsync: removeCartItem } = useDeleteCartItemQuery();
+
+  const displayImage = variant?.images?.[0] || product.images[0];
+  const displayPrice = variant?.price || product.price;
+  const displayStock = variant?.stock
+    ? variant?.stock - variant?.reservedStock
+    : product.stock - product.reservedStock;
+  const displayName = variant?.name || product.name;
+  const selectedvariant = options
+    ?.filter((o) => variant?.variant.includes(o.id))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <Card className="border-border bg-muted/40 w-full overflow-hidden border py-4">
-      <div className="flex gap-2 px-2 py-2 sm:flex-row sm:gap-6 md:p-4 md:py-2">
+      <div
+        onClick={(e) => {
+          e.preventDefault();
+          naviagate(`/product/${product.slug || product.id}`);
+        }}
+        className="flex gap-2 px-2 py-2 sm:flex-row sm:gap-6 md:p-4 md:py-2"
+      >
         <div className="shrink-0">
           <div className="bg-muted relative h-24 w-24 overflow-hidden rounded-lg sm:h-32 sm:w-32">
             <img
-              src={product.images[0]}
-              alt={product.name}
+              src={displayImage}
+              alt={displayName}
               className="object-cover"
             />
           </div>
@@ -118,10 +143,15 @@ const CartItem = ({ item }) => {
 
         <div className="flex flex-1 flex-col justify-between">
           <div>
-            <h3 className="text-foreground font-semibold">{product.name}</h3>
-            <p className="text-muted-foreground mt-1 text-sm">
-              {product.description}
-            </p>
+            <h3 className="text-foreground font-semibold">{displayName}</h3>
+            <div className="flex gap-2 divide-x-2">
+              {selectedvariant?.length > 0 &&
+                selectedvariant.map((v) => (
+                  <p key={v.id} className="mt-1 px-2">
+                    {v.value}
+                  </p>
+                ))}
+            </div>
           </div>
 
           <div className="mt-4 flex items-center gap-2">
@@ -130,12 +160,13 @@ const CartItem = ({ item }) => {
               size="icon"
               className="h-8 w-8 bg-transparent"
               disabled={quantity <= 1}
-              onClick={() =>
+              onClick={(e) => {
+                e.stopPropagation();
                 updateCartItem({
                   cartItemId: id,
                   updatedQuantity: quantity - 1,
-                })
-              }
+                });
+              }}
             >
               <Minus className="h-4 w-4" />
             </Button>
@@ -144,13 +175,14 @@ const CartItem = ({ item }) => {
               variant="outline"
               size="icon"
               className="h-8 w-8 bg-transparent"
-              onClick={() =>
+              onClick={(e) => {
+                e.stopPropagation();
                 updateCartItem({
                   cartItemId: id,
                   updatedQuantity: quantity + 1,
-                })
-              }
-              disabled={quantity >= product.stock}
+                });
+              }}
+              disabled={quantity >= displayStock}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -160,17 +192,20 @@ const CartItem = ({ item }) => {
         <div className="flex flex-col items-end justify-between">
           <div className="text-right">
             <p className="text-foreground text-lg font-semibold tracking-tight">
-              ₹{product.price.toLocaleString()}
+              ₹{displayPrice.toLocaleString()}
             </p>
             <p className="text-muted-foreground mt-1 font-medium tracking-tight line-through">
-              ₹{Number(product.price + 100).toLocaleString()}
+              ₹{Number(displayPrice + 100).toLocaleString()}
             </p>
           </div>
           <Button
             variant="ghost"
             size="icon"
             className="opacity-75 hover:opacity-100"
-            onClick={() => removeCartItem(item.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              removeCartItem(item.id);
+            }}
           >
             <X className="h-4 w-4" />
           </Button>

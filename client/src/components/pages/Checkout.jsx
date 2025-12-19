@@ -18,7 +18,7 @@ import { ShippingAddressSection } from '../user/ShippingAddress';
 import { toast } from 'sonner';
 
 const Checkout = () => {
-  const { data: cartItems, isLoading, isError } = useCartQuery();
+  const { data: { cartItems } = {}, isLoading, isError } = useCartQuery();
   const { mutateAsync: placeOrder, isPending: isPlacingOrder } =
     usePlaceOrder();
   const { Razorpay } = useRazorpay();

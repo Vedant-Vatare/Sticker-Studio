@@ -24,8 +24,11 @@ export const useAddToCartMutation = () => {
     mutationFn: addProductToCart,
 
     onSuccess: (newCartItem) => {
-      queryClient.setQueryData(['cart'], (oldCart = []) => {
-        return [...oldCart, newCartItem];
+      queryClient.setQueryData(['cart'], (old = {}) => {
+        return {
+          ...old,
+          cartItems: [...old.cartItems, newCartItem],
+        };
       });
     },
 
@@ -38,26 +41,33 @@ export const useAddToCartMutation = () => {
 
 export const useUpdateCartItemQuery = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ['cart'],
     mutationFn: updateProductInCart,
 
     onMutate: async ({ cartItemId, updatedQuantity }) => {
       await queryClient.cancelQueries({ queryKey: ['cart'] });
-      const previousCart = queryClient.getQueryData(['cart']);
 
-      queryClient.setQueryData(['cart'], (cartItems = []) => {
-        return cartItems.map((item) =>
-          item.id === cartItemId
-            ? { ...item, quantity: updatedQuantity }
-            : item,
-        );
+      const previousCart = queryClient.getQueryData['cart'];
+
+      queryClient.setQueryData(['cart'], (old) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          cartItems: old.cartItems.map((item) =>
+            item.id === cartItemId
+              ? { ...item, quantity: updatedQuantity }
+              : item,
+          ),
+        };
       });
 
       return { previousCart };
     },
 
-    onError: (error, { cartItemId }, context) => {
+    onError: (_error, _vars, context) => {
       if (context?.previousCart) {
         queryClient.setQueryData(['cart'], context.previousCart);
       }
@@ -71,17 +81,25 @@ export const useDeleteCartItemQuery = () => {
   return useMutation({
     mutationKey: ['cart'],
     mutationFn: removeProductFromCart,
+
     onMutate: async (cartItemId) => {
       await queryClient.cancelQueries({ queryKey: ['cart'] });
-      const previousCart = queryClient.getQueryData(['cart']);
-      queryClient.setQueryData(['cart'], (old = []) =>
-        old.filter((item) => item.id !== cartItemId),
-      );
+
+      const previousCart = queryClient.getQueryData['cart'];
+
+      queryClient.setQueryData(['cart'], (old) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          cartItems: old.cartItems.filter((item) => item.id !== cartItemId),
+        };
+      });
 
       return { previousCart };
     },
 
-    onError: (error, cartItemId, context) => {
+    onError: (_error, _cartItemId, context) => {
       if (context?.previousCart) {
         queryClient.setQueryData(['cart'], context.previousCart);
       }

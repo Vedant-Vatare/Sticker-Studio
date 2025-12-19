@@ -156,7 +156,7 @@ const CartButton = ({
   variant,
   showSelectVariantMSG,
 }) => {
-  const { data: cartItems, isLoading, isSuccess } = useCartQuery();
+  const { data: { cartItems } = {}, isLoading, isSuccess } = useCartQuery();
   const { mutate: addTocart, isPending } = useAddToCartMutation();
 
   if (isLoading || !isSuccess) return null;
@@ -165,7 +165,6 @@ const CartButton = ({
     (item) =>
       item.product.id === product.id && item?.variant?.id === variant?.id,
   );
-  console.log({ cartItems, product, variant, isAddedInCart });
 
   if (isAddedInCart) {
     return (
@@ -193,8 +192,13 @@ const CartButton = ({
           addTocart({ product, variant });
         }}
       >
-        <ShoppingBagIcon className="h-5 w-5" />
-        {isPending ? <LoadingDots /> : 'Add to Cart'}
+        {isPending ? (
+          <LoadingDots color={'bg-primary'} />
+        ) : (
+          <>
+            <ShoppingBagIcon className="h-5 w-5" /> Add to Cart
+          </>
+        )}
       </Button>
     </>
   );
@@ -378,7 +382,7 @@ export default function ProductPage() {
               </div>
             )}
 
-            <div className="my-2 flex justify-evenly gap-3 px-2">
+            <div className="my-2 grid grid-cols-2 gap-3 px-2">
               <Button className="flex-1 rounded-sm text-base" size="lg">
                 Buy Now
               </Button>

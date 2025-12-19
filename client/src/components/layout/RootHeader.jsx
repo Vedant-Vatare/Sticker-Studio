@@ -109,7 +109,7 @@ const AccountButton = () => {
 };
 
 const RootHeaderLayout = () => {
-  const { data: cartItems } = useCartQuery();
+  const { data: { cartItems } = {} } = useCartQuery();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const path = useLocation().pathname;
 

@@ -83,9 +83,21 @@ export async function addToCart(req, res) {
       },
     });
 
+    let options = [];
+    if (cartItem.variant) {
+      options = await prisma.option.findMany({
+        where: {
+          id: {
+            in: cartItem.variant.variant,
+          },
+        },
+      });
+    }
+
     return res.status(201).json({
       message: 'Product added to cart',
       cartItem,
+      options,
     });
   } catch (e) {
     if (e.code === 'P2002') {
@@ -151,9 +163,22 @@ export async function updateCartItem(req, res) {
       },
     });
 
-    return res
-      .status(200)
-      .json({ message: 'Cart item updated successfully', updatedCartItem });
+    let options = [];
+    if (updatedCartItem.variant) {
+      options = await prisma.option.findMany({
+        where: {
+          id: {
+            in: updatedCartItem.variant.variant,
+          },
+        },
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Cart item updated successfully',
+      updatedCartItem,
+      options,
+    });
   } catch (error) {
     if (error.code === 'P2025') {
       return res.status(400).json({ message: 'Cart item not found' });

@@ -7,7 +7,7 @@ export const fetchUserCart = async () => {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  return response.data.cart;
+  return { cartItems: response.data.cart, options: response.data?.options };
 };
 
 export const addProductToCart = async ({ product, variant }) => {
@@ -24,11 +24,14 @@ export const addProductToCart = async ({ product, variant }) => {
 };
 
 export const updateProductInCart = async ({ cartItemId, updatedQuantity }) => {
-  const response = await axios.put('/cart/', {
+  const response = await axios.put('/cart', {
     cartItemId,
     quantity: updatedQuantity,
   });
-  return response.data.cartItem;
+  return {
+    updatedCartItems: response.data.updatedCartItem,
+    options: response.data?.options,
+  };
 };
 
 export const removeProductFromCart = async (cartItemId) => {
