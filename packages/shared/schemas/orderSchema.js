@@ -1,13 +1,28 @@
 import { z } from 'zod';
 
 export const createOrderSchema = z.object({
-  orderItems: z.array(
-    z.object({
-      productId: z.uuid(),
-      quantity: z
-        .number({ error: 'Invalid quantity' })
-        .min(1, { error: 'Minimum order quantity is 1 item.' })
-        .max(20, { error: 'Maximum order limit is 20 items.' }),
+  shippingAddressId: z.uuid({
+    error: 'Invalid shipping address ID',
+  }),
+  orderItems: z
+    .array(
+      z.object({
+        productId: z.uuid({
+          error: 'Invalid product ID',
+        }),
+        variantId: z.string().optional().nullable(),
+        quantity: z
+          .number()
+          .int()
+          .positive({
+            error: 'Quantity must be a positive integer',
+          })
+          .min(1, {
+            error: 'Quantity must be at least 1',
+          }),
+      }),
+    )
+    .min(1, {
+      error: 'At least one order item is required',
     }),
-  ),
 });
