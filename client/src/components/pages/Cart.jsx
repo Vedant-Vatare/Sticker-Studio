@@ -10,7 +10,7 @@ import {
   useUpdateCartItemQuery,
 } from '@/hooks/cart';
 import ServerError from './ServerError';
-import { breadcrumbStore } from '@/store/globalStore';
+import { breadcrumbStore, checkoutOrderStore } from '@/store/globalStore';
 
 import CartFAQ from '../ui/FAQ/CartFAQ';
 
@@ -21,8 +21,9 @@ const Cart = () => {
     isSuccess,
     isError,
   } = useCartQuery();
-
+  const setCheckoutItems = checkoutOrderStore((store) => store.setOrderItem);
   const setBreadcrumbs = breadcrumbStore((state) => state.setBreadcrumbs);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setBreadcrumbs([
@@ -33,7 +34,7 @@ const Cart = () => {
     return () => setBreadcrumbs([]);
   }, []);
 
-  if ((isLoading, !isSuccess)) {
+  if (isLoading) {
     return <CartSkeleton />;
   }
 
@@ -91,14 +92,17 @@ const Cart = () => {
           <span className="text-base font-semibold md:text-xl">
             ₹{cartValue.toLocaleString()}
           </span>
-          <Link to="/checkout" className="block w-max">
-            <Button
-              className="h-12 rounded-none px-10 text-base md:px-16"
-              size="lg"
-            >
-              Checkout
-            </Button>
-          </Link>
+          <Button
+            className="h-12 rounded-none px-10 text-base md:px-16"
+            size="lg"
+            asChild
+            onClick={() => {
+              setCheckoutItems(cartItems);
+              navigate('/checkout');
+            }}
+          >
+            <span className="block w-max">Checkout</span>
+          </Button>
         </div>
       )}
     </>

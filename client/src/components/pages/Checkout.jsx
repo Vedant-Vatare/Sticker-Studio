@@ -1,14 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Percent, PackageIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useCartQuery } from '@/hooks/cart';
-import ServerError from './ServerError';
-import { breadcrumbStore } from '@/store/globalStore';
+import { useEffect, useState, useRef } from 'react';
+import { breadcrumbStore, checkoutOrderStore } from '@/store/globalStore';
 import { useUserStore } from '@/store/userStore';
 import { useLoginModal } from '@/store/userStore';
 import { usePlaceOrder } from '@/hooks/order';
@@ -18,7 +15,8 @@ import { ShippingAddressSection } from '../user/ShippingAddress';
 import { toast } from 'sonner';
 
 const Checkout = () => {
-  const { data: { cartItems } = {}, isLoading, isError } = useCartQuery();
+  const orderItems = checkoutOrderStore((store) => store.orderItems);
+  const user = useUserStore((state) => state.user);
   const { mutateAsync: placeOrder, isPending: isPlacingOrder } =
     usePlaceOrder();
   const { Razorpay } = useRazorpay();
@@ -27,11 +25,15 @@ const Checkout = () => {
   const [shippingAddressId, setShippingAddressId] = useState(null);
   const setBreadcrumbs = breadcrumbStore((state) => state.setBreadcrumbs);
   const openLoginModal = useLoginModal((state) => state.openModal);
+
+  const isCancellingRef = useRef(false);
+
   const subtotal =
-    cartItems?.reduce(
-      (total, item) => total + item.product.price * item.quantity,
-      0,
-    ) || 0;
+    orderItems?.reduce((total, item) => {
+      const price = item.variant?.price ?? item.product.price;
+      return total + price * item.quantity;
+    }, 0) || 0;
+
   const discount = subtotal > 999 ? 100 : 0;
   const shipping = 20;
   const total = subtotal - discount + shipping;
@@ -44,73 +46,106 @@ const Checkout = () => {
     ]);
   }, [setBreadcrumbs]);
 
+  const handleCancelOrder = async (orderId) => {
+    if (isCancellingRef.current) {
+      return;
+    }
+
+    isCancellingRef.current = true;
+    try {
+      await cancelOrder(orderId);
+      toast.info('Your order was cancelled');
+    } catch (e) {
+      console.error('Failed to cancel order:', e);
+      toast.error('Failed to cancel the order');
+    } finally {
+      isCancellingRef.current = false;
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!isLoggedIn) {
       openLoginModal();
       return;
     }
-    if (!agreedToTerms) return;
-    const orderItems = cartItems?.map((item) => ({
+
+    if (!agreedToTerms) {
+      toast.error('Please agree to the terms and conditions');
+      return;
+    }
+
+    if (!shippingAddressId) {
+      toast.error('Please select a shipping address');
+      return;
+    }
+
+    const order = orderItems?.map((item) => ({
       productId: item.product.id,
+      variantId: item?.variant?.id || null,
       quantity: item.quantity,
     }));
-    const placedOrder = await placeOrder({ orderItems, shippingAddressId });
+
+    let placedOrder;
+
+    try {
+      placedOrder = await placeOrder({
+        orderItems: order,
+        shippingAddressId,
+      });
+    } catch (error) {
+      console.error('Failed to place order:', error);
+      toast.error(
+        error?.response?.data?.message ||
+          'Failed to create order. Please try again.',
+      );
+      return;
+    }
+
+    isCancellingRef.current = false;
 
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY,
       name: 'Sticker Studio',
-      description: 'Test Transaction',
+      description: 'Order Payment',
       order_id: placedOrder.razorpay.orderId,
       amount: placedOrder.razorpay.amount,
       currency: placedOrder.razorpay.currency,
       handler: async (razorpayResponse) => {
         try {
           await verifyPayment(razorpayResponse);
+          toast.success('Your order has been confirmed.');
         } catch (e) {
-          toast.error('failed to verify payment status');
+          console.error('Payment verification failed:', e);
+          toast.error('Failed to verify payment. Please contact support.');
         }
       },
       prefill: {
-        name: 'test user',
-        email: 'test.user@example.com',
-        contact: '+911231231231',
+        name: user?.full_name || '',
+        email: user?.email || '',
+        contact: user?.phone || '',
       },
       theme: {
         color: '#2563eb',
       },
       modal: {
         ondismiss: async () => {
-          try {
-            await cancelOrder(placedOrder.order.id);
-            toast.info('your order was cancelled');
-          } catch (e) {
-            toast.error('failed to cancel the order');
-          }
+          await handleCancelOrder(placedOrder.order.id);
         },
       },
     };
 
     const razorpayInstance = new Razorpay(options);
-    razorpayInstance.on('payment.failed', async () => {
-      try {
-        await cancelOrder(placedOrder.order.id);
-        toast.info('your order was cancelled');
-      } catch (e) {
-        toast.error('failed to cancel the order');
-      }
+
+    razorpayInstance.on('payment.failed', async (response) => {
+      console.error('Payment failed:', response.error);
+      toast.error(`Payment failed: ${response.error.description}`);
+      await handleCancelOrder(placedOrder.order.id);
     });
+
     razorpayInstance.open();
   };
 
-  if (isLoading) {
-    return <CheckoutSkeleton />;
-  }
-
-  if (isError) {
-    return <ServerError />;
-  }
-
-  if (cartItems?.length === 0) {
+  if (orderItems?.length === 0) {
     return (
       <div className="bg-muted min-h-screen">
         <div className="mx-auto max-w-7xl px-2 py-8 sm:px-6 lg:px-8">
@@ -131,7 +166,7 @@ const Checkout = () => {
   return (
     <div className="bg-muted min-h-screen pb-8">
       <div className="mx-auto max-w-4xl px-2 py-8 sm:px-6 lg:px-8">
-        <h2 className="section-title text-base!">Checkout</h2>
+        <h2 className="section-title">Checkout</h2>
 
         {!isLoggedIn && (
           <div className="border-border bg-info/60 mb-6 border p-4">
@@ -150,43 +185,60 @@ const Checkout = () => {
             </p>
           </div>
         )}
+
         <ShippingAddressSection
           shippingAddressId={shippingAddressId}
           setShippingAddressId={setShippingAddressId}
         />
+
         <Card className="border-border gap-3 rounded-xs border p-4 md:p-6">
-          <h2 className="text-foreground font-medium!">Order Summary</h2>
+          <h2 className="section-title text-base!">Order Summary</h2>
 
           <div className="space-y-4">
-            {cartItems?.map((item, index) => (
-              <div key={item.id}>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="shrink-0">
-                    <div className="bg-muted relative h-20 w-20 overflow-hidden rounded-lg sm:h-32 sm:w-32">
-                      <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        className="h-full w-full object-contain"
-                      />
+            {orderItems?.map((item, index) => {
+              const price = item.variant?.price ?? item.product.price;
+              const itemTotal = price * item.quantity;
+
+              return (
+                <div key={item.id}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="shrink-0">
+                      <div className="bg-muted relative h-20 w-20 overflow-hidden rounded-lg sm:h-32 sm:w-32">
+                        <img
+                          src={item.product.images[0]}
+                          alt={item.product.name}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex-1 self-start">
+                      <h3 className="text-foreground text-base font-medium">
+                        {item.product.name}
+                      </h3>
+                      {item.variant && (
+                        <p className="text-muted-foreground text-sm">
+                          Variant: {item.variant.sku}
+                        </p>
+                      )}
+                      <p className="text-muted-foreground text-sm">
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-foreground text-lg font-semibold">
+                        ₹{itemTotal.toLocaleString()}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        ₹{price.toLocaleString()} each
+                      </p>
                     </div>
                   </div>
-                  <div className="flex-1 self-start">
-                    <h3 className="text-foreground text-base font-medium">
-                      {item.product.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      Qty: {item.quantity}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-foreground text-lg font-semibold">
-                      ₹{(item.product.price * item.quantity).toLocaleString()}
-                    </p>
-                  </div>
+                  {index < orderItems.length - 1 && (
+                    <Separator className="mt-4" />
+                  )}
                 </div>
-                {index < cartItems.length - 1 && <Separator className="mt-4" />}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <Separator className="my-6" />
@@ -194,7 +246,7 @@ const Checkout = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-semibold">
-                Subtotal ({cartItems?.length} items)
+                Subtotal ({orderItems?.length} items)
               </span>
               <span className="text-foreground font-bold">
                 ₹{subtotal.toLocaleString()}
@@ -268,51 +320,15 @@ const Checkout = () => {
               </Link>
             </label>
           </div>
+
           <Button
             className="mt-3 w-full text-base"
             size="lg"
-            disabled={!agreedToTerms || isPlacingOrder}
+            disabled={!agreedToTerms || !shippingAddressId || isPlacingOrder}
             onClick={handlePlaceOrder}
           >
             {isPlacingOrder ? 'Processing...' : 'Place Order'}
           </Button>
-        </Card>
-      </div>
-    </div>
-  );
-};
-
-const CheckoutSkeleton = () => {
-  return (
-    <div className="bg-background min-h-screen pb-8">
-      <div className="mx-auto max-w-3xl px-2 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-foreground page-title mb-5">Checkout</h1>
-        <Card className="border-border border p-6">
-          <Skeleton className="mb-6 h-7 w-40" />
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i}>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <Skeleton className="mb-2 h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                  <Skeleton className="h-6 w-20" />
-                </div>
-                {i < 2 && <Separator className="mt-4" />}
-              </div>
-            ))}
-          </div>
-          <Separator className="my-6" />
-          <div className="space-y-3">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="mt-4 h-6 w-full" />
-          </div>
-          <Separator className="my-6" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="mt-6 h-12 w-full" />
         </Card>
       </div>
     </div>

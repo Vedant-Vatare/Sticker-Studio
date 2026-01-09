@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  Heart,
   ChevronLeft,
   ChevronRight,
   ShoppingBagIcon,
@@ -15,6 +14,7 @@ import { useProductDetails, useProductVariant } from '@/hooks/product';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { useAddToCartMutation, useCartQuery } from '@/hooks/cart';
+import { checkoutOrderStore } from '@/store/globalStore';
 import ProductOptions from '../product/ProductOptions';
 import { Badge } from '../ui/badge';
 import ProductInfo from '../product/ProductInformation';
@@ -206,11 +206,12 @@ const CartButton = ({
 
 export default function ProductPage() {
   const { identifier } = useParams();
+  const navigate = useNavigate();
   const { data: product, isLoading: productLoading } =
     useProductDetails(identifier);
   const { data: productVariantDetails, isLoading: variantLoading } =
     useProductVariant(product?.id);
-
+  const setCheckoutItems = checkoutOrderStore((store) => store.setOrderItem);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [showSelectVariantMsg, setShowSelectVariantMsg] = useState(false);
 
@@ -311,6 +312,37 @@ export default function ProductPage() {
   const discount = Math.round(
     ((product.basePrice - product.price) / product.basePrice) * 100,
   );
+  const handleBuyProduct = (e) => {
+    e.preventDefault();
+    if (productVariantDetails.variants.length > 0 && !selectedvariant) {
+      setShowSelectVariantMsg(true);
+      console.log('select variant');
+
+      return;
+    }
+    const checkoutItem = {
+      product: {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        images: product.images,
+        price: product.price,
+      },
+      variant: selectedvariant
+        ? {
+            id: selectedvariant.id,
+            sku: selectedvariant.sku,
+            variant: selectedvariant.variant,
+            images: selectedvariant.images,
+            price: selectedvariant.price,
+          }
+        : null,
+      quantity: 1,
+    };
+
+    setCheckoutItems([checkoutItem]);
+    navigate('/checkout');
+  };
 
   return (
     <div className="bg-background min-h-screen">
@@ -383,7 +415,11 @@ export default function ProductPage() {
             )}
 
             <div className="my-2 grid grid-cols-2 gap-3 px-2">
-              <Button className="flex-1 rounded-sm text-base" size="lg">
+              <Button
+                onClick={handleBuyProduct}
+                className="flex-1 rounded-sm text-base"
+                size="lg"
+              >
                 Buy Now
               </Button>
               <CartButton
