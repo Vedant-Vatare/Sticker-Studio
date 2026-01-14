@@ -42,6 +42,8 @@ const Cart = () => {
     return <ServerError />;
   }
 
+  if (!cartItems || cartItems?.length == 0) return null;
+
   const cartValue = cartItems?.reduce((total, item) => {
     const price = item?.variant ? item.variant.price : item.product.price;
     return total + price * item.quantity;

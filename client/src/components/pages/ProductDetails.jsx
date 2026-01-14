@@ -21,6 +21,8 @@ import ProductInfo from '../product/ProductInformation';
 import ProductRecommendations from '../product/ProductRecommendations';
 import WishlistButton from '../product/WishlistButton';
 import LoadingDots from '../ui/LoadingDots';
+import ResponsiveModal from '../ui/modal/ResponsiveModal';
+import BuyNowModal from '../product/BuyNowModal';
 
 const ProductPageSkeleton = () => {
   return (
@@ -214,6 +216,7 @@ export default function ProductPage() {
   const setCheckoutItems = checkoutOrderStore((store) => store.setOrderItem);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [showSelectVariantMsg, setShowSelectVariantMsg] = useState(false);
+  const [openBuyNowModal, setOpenBuyNowModal] = useState(false);
 
   const groupedOptions = useMemo(() => {
     if (
@@ -263,7 +266,6 @@ export default function ProductPage() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [productVariantDetails]);
 
-  // populating initial group of options with empty strings
   useEffect(() => {
     if (groupedOptions.length > 0) {
       const initialVariant = {};
@@ -320,6 +322,7 @@ export default function ProductPage() {
 
       return;
     }
+
     const checkoutItem = {
       product: {
         id: product.id,
@@ -415,13 +418,36 @@ export default function ProductPage() {
             )}
 
             <div className="my-2 grid grid-cols-2 gap-3 px-2">
-              <Button
-                onClick={handleBuyProduct}
-                className="flex-1 rounded-sm text-base"
-                size="lg"
+              <ResponsiveModal
+                className={'rounded-sm p-1 px-3 md:min-w-xl'}
+                onOpenChange={setOpenBuyNowModal}
+                open={openBuyNowModal}
+                showCloseButton={false}
+                trigger={
+                  <Button
+                    onClick={(e) => {
+                      if (
+                        productVariantDetails.variants.length > 0 &&
+                        !selectedvariant
+                      ) {
+                        e.preventDefault();
+                        setShowSelectVariantMsg(true);
+                        return;
+                      }
+                    }}
+                    className="flex-1 rounded-sm text-base"
+                    size="lg"
+                  >
+                    Buy Now
+                  </Button>
+                }
               >
-                Buy Now
-              </Button>
+                <BuyNowModal
+                  orderItem={{ product, variant: selectedvariant, quantity: 1 }}
+                  closeModal={() => setOpenBuyNowModal(false)}
+                />
+              </ResponsiveModal>
+
               <CartButton
                 product={product}
                 variant={selectedvariant}

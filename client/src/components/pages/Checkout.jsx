@@ -200,12 +200,14 @@ const Checkout = () => {
               const itemTotal = price * item.quantity;
 
               return (
-                <div key={item.id}>
+                <div key={item.id || index}>
                   <div className="flex items-center justify-between gap-4">
                     <div className="shrink-0">
                       <div className="bg-muted relative h-20 w-20 overflow-hidden rounded-lg sm:h-32 sm:w-32">
                         <img
-                          src={item.product.images[0]}
+                          src={
+                            item?.variant?.images[0] || item.product.images[0]
+                          }
                           alt={item.product.name}
                           className="h-full w-full object-contain"
                         />

@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import useMediaQuery from '@/hooks/useMediaQuery';
+import { cn } from '@/lib/utils';
 
 const ResponsiveModal = ({
   children,
@@ -29,6 +30,7 @@ const ResponsiveModal = ({
   onOpenChange,
   showCloseButton = false,
   query = '(min-width: 500px)',
+  className,
 }) => {
   const isDesktop = useMediaQuery(query);
 
@@ -38,7 +40,7 @@ const ResponsiveModal = ({
         <DialogTrigger asChild>{trigger}</DialogTrigger>
         <DialogContent
           showCloseButton={showCloseButton}
-          className="sm:max-w-[425px]"
+          className={cn('sm:max-w-[425px]', className)}
         >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
@@ -58,13 +60,13 @@ const ResponsiveModal = ({
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
-        <DrawerBody>
-          <div className="px-4">{children}</div>
-        </DrawerBody>
+        <DrawerBody className={cn('px-4', className)}>{children}</DrawerBody>
         <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
+          {!!showCloseButton && (
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          )}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
